@@ -24,13 +24,28 @@ The content architecture (skills, platform references, per-repo instructions) is
 | Copilot reads skills based on keyword matching without routing | Installed dagster-expert skill, told Copilot "I need to do dagster work" with no routing table in place | ✅ Copilot matched keywords directly to skill and read it — confirms skills-only architecture works |
 | Copilot reads multiple skills in a single interaction | Installed datahub-dlt and dagster-expert skills, prompted: "Create a new dlt source for ServiceNow and wire it up as a Dagster asset on a daily schedule" | ✅ Copilot identified both domains, read both skill files, and combined knowledge from both. No agent or orchestration layer needed. |
 | Copilot respects skill constraints in unfamiliar workspace | Same multi-skill test run in a non-DataHub repo | ✅ Copilot attempted to find expected workspace files (sources/p8e-data-source-*/, pyproject.toml) and correctly identified they were missing — constraints are being followed |
-| VS Code Agent Plugin feature supports skill bundling | TBD — needs validation | ⬜ Test that plugin.json can bundle skills and that they appear in Copilot after install |
-| ADO git remote works as plugin marketplace source | TBD — needs validation | ⬜ Test that `chat.plugins.marketplaces` accepts ADO HTTPS git URLs |
-| Plugin bundles custom instructions (.instructions.md) | TBD — needs validation | ⬜ Test whether .instructions.md in a plugin is picked up as user-level instructions |
+| VS Code Agent Plugin feature supports skill bundling | Created plugin with datahub-dlt skill, installed via GitHub marketplace | ✅ Skill appears in `/skills` list with "Plugins" flag. Copilot reads SKILL.md and references/ when invoked. |
+| Plugin-installed skills auto-match on keywords | Prompted "create a new dlt source for the ServiceNow API using the p8e-data-source pattern" without `/datahub-dlt` prefix | ✅ Copilot matched keywords from frontmatter description and auto-invoked the skill. Requires domain-specific keywords — generic prompts like "create a data source" may not trigger. |
+| ADO in VS Code `chat.plugins.marketplaces` | Tested multiple ADO URL formats including PAT-embedded URLs | ❌ VS Code silently ignores ADO URLs. Only GitHub URL patterns are recognized. |
+| ADO in Copilot CLI `plugin marketplace add` | `copilot plugin marketplace add <ADO URL>` | ✅ Works — but CLI plugins don't sync to VS Code. Separate plugin systems. |
+| `file:///` local clone as marketplace source | Cloned ADO repo locally, used `file:///C:/Users/.../repo` | ✅ Works in VS Code. Requires manual `git pull` for updates. |
+| Duplicate skills from multiple directories | Had skills in both `skills/` (root) and `plugins/datahub/skills/` | ❌ VS Code discovers both — skill appeared twice. Removed root copy. |
+| Plugin update auto-detected by VS Code | Pushed version bump to GitHub, checked for update notification | ⚠️ No auto-update observed. Manual `git pull` + reload needed. May be caused by manual clone workaround — needs further investigation. |
+| Plugin bundles custom instructions (.instructions.md) | Placed .instructions.md in plugin root with DataHub mental model | ❌ Not picked up. Plugin format supports skills, agents, hooks, mcp, commands — but NOT .instructions.md. Copilot ignores it. |
+| Skill paths can traverse outside plugin directory | Used `../../skills/datahub-dlt` in plugin.json to reference shared skills/ directory | ❌ Skill did not appear in `/skills`. Changed to `./skills/datahub-dlt` with skills inside the plugin directory — works. |
+| VS Code clone-on-install works reliably | Clicked Install from @agentPlugins in Extensions sidebar | ⚠️ Unreliable. VS Code pre-creates parent directories, then `git clone` fails with "destination path already exists." Workaround: manually clone to the expected path, then reload. See setup journal. |
 
 The multi-skill test is the most important validation. It confirms that Copilot natively handles cross-domain tasks without agents, routing tables, or orchestration — the simplest possible architecture works.
 
-The three untested items are critical for v5. If the plugin feature doesn't support ADO repos or custom instructions, fallback plans are documented in Section 8.
+**Decisions from Phase 0 testing:**
+
+1. **Ambient context delivery: preamble fallback.** Since .instructions.md is not supported by the plugin format, the ~150 word DataHub mental model is baked into each skill's SKILL.md as a "Platform Context" section. This means ambient context is only available when a skill is matched — not on every interaction. This is acceptable because: (a) the context only matters during DataHub work, (b) DataHub work triggers a skill, (c) general questions without skill context are not the target use case.
+
+2. **Marketplace hosting: GitHub.** VS Code's `chat.plugins.marketplaces` only recognizes GitHub URLs. ADO URLs are silently ignored. ADO works via Copilot CLI but that's a separate plugin system. GitHub shorthand (`owner/repo`) is the primary distribution. ADO is kept as a secondary remote.
+
+3. **Skill location: single copy inside plugin directory.** Skills must live inside the plugin directory (e.g., `plugins/datahub/skills/`) with relative paths like `./skills/datahub-dlt`. Paths that traverse outside the plugin root (`../../skills/`) do not resolve. Do NOT keep a second copy at the repo root — VS Code discovers both and shows duplicate skills.
+
+4. **Updates: no auto-update exists.** Agent plugins have no auto-update mechanism — this is a preview feature limitation, not a bug in our setup. No `chat.plugins.autoUpdate` setting exists, no "Update" button in the Extensions sidebar, and no documented polling. Update workflow: tech lead pushes to GitHub, notifies team, devs run `git pull` in their agentPlugins directory and reload VS Code. Tim Heuer's [Agent Plugins Browser](https://github.com/timheuer/vscode-agent-plugins) extension adds a "Refresh" command that may help.
 
 ---
 
@@ -65,8 +80,9 @@ This plugin puts that knowledge directly into the developer's IDE, scoped to exa
 │      architecture.md, datalake-layers.md, deployment-*.md,              │
 │      template-map.md, pr-workflow.md                                    │
 │                                                                         │
-│  Ambient Context (if supported by plugin format — see Section 8)        │
-│    .instructions.md  — slim DataHub mental model                        │
+│  Ambient Context (baked into each skill's preamble)                     │
+│    "Platform Context" section in every SKILL.md                         │
+│    (.instructions.md NOT supported by plugin format — see Section 2)    │
 │                                                                         │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  REPO-LEVEL (version controlled in each working repo's ADO)             │
@@ -81,8 +97,8 @@ This plugin puts that knowledge directly into the developer's IDE, scoped to exa
 
 ### Three Layers of Context
 
-**Layer 1: Ambient context (every interaction)**
-A slim (~150 word) DataHub mental model. Gives Copilot baseline DataHub awareness: deployment lanes, datalake layers, vocabulary. Delivered either via `.instructions.md` in the plugin (if supported) or baked into each skill's preamble as a fallback.
+**Layer 1: Ambient context (every skill invocation)**
+A slim (~150 word) DataHub mental model. Gives Copilot baseline DataHub awareness: deployment lanes, datalake layers, vocabulary. Baked into each skill's SKILL.md as a "Platform Context" preamble section. Phase 0 testing confirmed that `.instructions.md` is not supported by the plugin format, so the preamble approach is the permanent solution, not a fallback.
 
 ```markdown
 # DataHub Platform Context
@@ -168,7 +184,7 @@ The central repo serves dual roles: it's the **plugin source** (contains the ski
 ### Structure
 
 ```
-datahub-copilot/                          (ADO repo)
+datahub-copilot/                          (GitHub repo — marketplace source)
 │
 ├── .github/
 │   └── plugin/
@@ -176,51 +192,52 @@ datahub-copilot/                          (ADO repo)
 │
 ├── plugins/
 │   └── datahub/
-│       └── .github/
-│           └── plugin.json               # Plugin manifest
+│       ├── .github/
+│       │   └── plugin.json               # Plugin manifest (also at plugin root)
+│       ├── plugin.json                   # Plugin manifest (VS Code reads this)
+│       └── skills/                       # Skills MUST live inside plugin directory
+│           ├── datahub-dagster/
+│           │   ├── SKILL.md              # Includes Platform Context preamble
+│           │   ├── UPSTREAM-SOURCE.md
+│           │   ├── skill-metadata.json
+│           │   └── references/
+│           │
+│           ├── datahub-dlt/
+│           │   ├── SKILL.md              # Includes Platform Context preamble
+│           │   ├── UPSTREAM-SOURCE.md
+│           │   ├── skill-metadata.json
+│           │   └── references/
+│           │
+│           ├── datahub-dbt/
+│           │   ├── SKILL.md
+│           │   ├── UPSTREAM-SOURCE.md
+│           │   ├── skill-metadata.json
+│           │   └── references/
+│           │
+│           ├── datahub-infra/
+│           │   ├── SKILL.md
+│           │   ├── UPSTREAM-SOURCE.md
+│           │   ├── skill-metadata.json
+│           │   └── references/
+│           │
+│           ├── datahub-k8s/
+│           │   ├── SKILL.md
+│           │   └── references/
+│           │
+│           ├── datahub-contracts/
+│           │   ├── SKILL.md
+│           │   └── references/
+│           │
+│           └── datahub-platform/         # NOT a skill — no SKILL.md
+│               └── references/
+│                   ├── architecture.md
+│                   ├── datalake-layers.md
+│                   ├── deployment-k8s.md
+│                   ├── deployment-dagster.md
+│                   ├── deployment-infra.md
+│                   ├── template-map.md
+│                   └── pr-workflow.md
 │
-├── skills/                               # All skills (referenced by plugin)
-│   ├── datahub-dagster/
-│   │   ├── SKILL.md
-│   │   ├── UPSTREAM-SOURCE.md
-│   │   ├── skill-metadata.json
-│   │   └── references/
-│   │
-│   ├── datahub-dlt/
-│   │   ├── SKILL.md
-│   │   ├── UPSTREAM-SOURCE.md
-│   │   ├── skill-metadata.json
-│   │   └── references/
-│   │
-│   ├── datahub-dbt/
-│   │   ├── SKILL.md
-│   │   ├── UPSTREAM-SOURCE.md
-│   │   ├── skill-metadata.json
-│   │   └── references/
-│   │
-│   ├── datahub-infra/
-│   │   ├── SKILL.md
-│   │   ├── UPSTREAM-SOURCE.md
-│   │   ├── skill-metadata.json
-│   │   └── references/
-│   │
-│   ├── datahub-k8s/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │
-│   ├── datahub-contracts/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │
-│   └── datahub-platform/                # NOT a skill — no SKILL.md
-│       └── references/
-│           ├── architecture.md
-│           ├── datalake-layers.md
-│           ├── deployment-k8s.md
-│           ├── deployment-dagster.md
-│           ├── deployment-infra.md
-│           ├── template-map.md
-│           └── pr-workflow.md
 │
 ├── repo-instructions/                    # Source for per-repo copilot-instructions.md
 │   ├── data-api.md
@@ -242,29 +259,31 @@ datahub-copilot/                          (ADO repo)
     └── infra-new-stack.md
 ```
 
+**Important:** Skills must live inside the plugin directory (`plugins/datahub/skills/`). Phase 0 testing confirmed that relative paths traversing outside the plugin root (e.g., `../../skills/`) do not resolve. The root `skills/` directory serves as the authoring/editing location. A build step or manual copy syncs changes into the plugin directory before committing.
+
 ### Plugin Manifest (plugin.json)
 
 ```json
 {
   "name": "datahub",
-  "description": "DataHub platform expertise for Copilot — curated skills for dlt, Dagster, dbt, Terraform, K8s, and ODCS data contracts",
+  "description": "DataHub platform expertise for Copilot - curated skills for dlt, Dagster, dbt, Terraform, K8s, and ODCS data contracts",
   "version": "1.0.0",
   "author": {
     "name": "DataHub Platform Team"
   },
   "skills": [
-    "../../skills/datahub-dagster",
-    "../../skills/datahub-dlt",
-    "../../skills/datahub-dbt",
-    "../../skills/datahub-infra",
-    "../../skills/datahub-k8s",
-    "../../skills/datahub-contracts",
-    "../../skills/datahub-platform"
+    "./skills/datahub-dagster",
+    "./skills/datahub-dlt",
+    "./skills/datahub-dbt",
+    "./skills/datahub-infra",
+    "./skills/datahub-k8s",
+    "./skills/datahub-contracts",
+    "./skills/datahub-platform"
   ]
 }
 ```
 
-Note: `plugin.json` lives in `plugins/datahub/.github/` but paths are resolved relative to the plugin's root (`plugins/datahub/`). The `../../skills/` prefix navigates up to the repo root's skills directory.
+Note: `plugin.json` lives at the plugin root (`plugins/datahub/plugin.json`). A copy also exists at `plugins/datahub/.github/plugin.json` for compatibility. Skill paths are resolved relative to the plugin root. **Paths must not traverse outside the plugin directory** — `../../skills/` does not work. Use `./skills/` with skills copied inside the plugin directory.
 
 ### Marketplace Manifest (marketplace.json)
 
@@ -291,22 +310,23 @@ Note: `plugin.json` lives in `plugins/datahub/.github/` but paths are resolved r
 
 ### Developer Setup (One-Time)
 
-Developer adds the marketplace to their VS Code user settings:
+Developer adds the marketplace to their VS Code user settings (**must be user-level, not workspace**):
 
 ```json
-// settings.json
+// settings.json (Ctrl+Shift+P → "Preferences: Open User Settings (JSON)")
 "chat.plugins.enabled": true,
 "chat.plugins.marketplaces": [
-    "https://dev.azure.com/protectivetfsprod/DataHub/_git/datahub-copilot.git"
+    "ewise123/datahub-copilot-plugin"
 ]
 ```
 
 Then installs the plugin from the Extensions sidebar: search `@agentPlugins`, find "datahub", click Install.
 
-If ADO HTTPS URLs don't work as marketplace sources (needs testing), alternatives:
-- Mirror the central repo to GitHub and use the GitHub shorthand
-- Use `chat.plugins.paths` to point to a local clone of the central repo
-- Fall back to v4 setup script
+**Known issue:** The Install button may fail with a git clone error ("destination path already exists"). This is a VS Code bug where it pre-creates parent directories before cloning. Workaround: manually clone the repo to the expected path and reload VS Code. See `PHASE-0-SETUP-JOURNAL.md` for detailed steps.
+
+**Alternative installation methods:**
+- `chat.plugins.paths` pointing to a local clone (works reliably, no marketplace needed)
+- v4 setup script as fallback
 
 ---
 
@@ -319,17 +339,22 @@ All user-level content — skills, platform references, and ambient context — 
 **How updates work:**
 1. Tech lead merges skill update to central repo main branch
 2. Plugin version is bumped in `plugin.json` and `marketplace.json`
-3. VS Code detects the update through the marketplace
-4. Developer sees update available in Extensions sidebar and installs it
+3. Tech lead notifies team (Teams/Slack) that an update is available
+4. Developer updates their local plugin:
+   - **Windows:** `git -C "%APPDATA%\Code\agentPlugins\github.com\ewise123\datahub-copilot-plugin" pull`
+   - **WSL:** `git -C /mnt/c/Users/{user}/AppData/Roaming/Code/agentPlugins/github.com/ewise123/datahub-copilot-plugin pull`
+5. Developer reloads VS Code (Ctrl+Shift+P → "Developer: Reload Window")
 
-**What needs validation:**
+**Note:** Agent plugins have no auto-update mechanism (preview limitation). There is no "Update" button, no polling, and no `chat.plugins.autoUpdate` setting. This may improve as the feature matures. Tim Heuer's [Agent Plugins Browser](https://github.com/timheuer/vscode-agent-plugins) extension adds a "Refresh" command that may simplify this.
 
-| Question | Fallback if No |
-|----------|---------------|
-| Do ADO HTTPS git URLs work as marketplace sources? | Mirror to GitHub, or use `chat.plugins.paths` with local clone |
-| Can the plugin bundle `.instructions.md` as custom instructions? | Bake the ~150 word mental model into each skill's preamble instead |
-| Does VS Code auto-notify when plugin updates are available? | Add Teams/Slack notification via ADO pipeline on merge to main (same as v4) |
-| Does plugin update require VS Code restart? | Document in README and include in notification message |
+**Phase 0 validation results:**
+
+| Question | Result | Action Taken |
+|----------|--------|--------------|
+| Do ADO HTTPS git URLs work as marketplace sources? | **No** in VS Code (silently ignored). **Yes** in Copilot CLI (separate system). | Hosted on GitHub. ADO kept as secondary remote. |
+| Can the plugin bundle `.instructions.md` as custom instructions? | **No** — not a supported plugin capability | Platform Context baked into each skill's SKILL.md preamble |
+| Does VS Code auto-notify when plugin updates are available? | **No** — no auto-update mechanism exists (preview limitation) | Devs run `git pull` in agentPlugins dir + reload VS Code |
+| Does plugin update require VS Code restart? | Reload Window is sufficient (not full restart) | Documented in update workflow |
 
 ### ADO Pipeline Channel (Repo-Level Content)
 
@@ -417,7 +442,7 @@ This is separate from the plugin because per-repo instructions are version-contr
 
 | Component | Type | Contents |
 |-----------|------|----------|
-| Ambient context | .instructions.md or skill preamble | Slim DataHub mental model — read on every Copilot interaction |
+| Ambient context | "Platform Context" preamble in each SKILL.md | Slim DataHub mental model — read when any skill is invoked (.instructions.md not supported by plugin format) |
 | datahub-platform/references/ | Reference files | Architecture, datalake layers, deployment paths, template map, PR workflows — read by domain skills via path |
 
 ---
@@ -485,10 +510,10 @@ This is separate from the plugin because per-repo instructions are version-contr
 
 ### Adding a New Skill
 
-1. Create `skills/{name}/SKILL.md` following the standard structure
+1. Create `plugins/datahub/skills/{name}/SKILL.md` following the standard structure (include Platform Context preamble)
 2. Add `references/` directory with supporting material
 3. If curating from upstream, add `UPSTREAM-SOURCE.md` with source details
-4. Add skill path to `plugins/datahub/.github/plugin.json`
+4. Add skill path to `plugins/datahub/plugin.json` (use `./skills/{name}`)
 5. Add the new skill's repos to `scan-config.json`
 6. Add example prompts and expected outputs to `tests/`
 7. Test with at least two developers on real tasks
@@ -522,20 +547,20 @@ This is separate from the plugin because per-repo instructions are version-contr
 
 ## 14. Rollout Plan
 
-### Phase 0: Plugin Validation (Week 1)
+### Phase 0: Plugin Validation (Week 1) — COMPLETE
 
-Before building content, validate the plugin mechanism:
+Validated the plugin mechanism. Full details in `PHASE-0-SETUP-JOURNAL.md`.
 
-- [ ] Enable `chat.plugins.enabled` in VS Code
-- [ ] Create minimal test plugin with one skill in the central repo
-- [ ] Add `marketplace.json` to the central repo
-- [ ] Test: does ADO HTTPS git URL work as marketplace source?
-- [ ] Test: can developer install plugin from Extensions sidebar?
-- [ ] Test: does the installed skill appear in Copilot and work correctly?
-- [ ] Test: can the plugin bundle `.instructions.md`? If not, plan the preamble fallback.
-- [ ] Test: does updating the plugin in the repo propagate to VS Code?
-- [ ] Test: plugin install with Copilot CLI for better error diagnostics
-- [ ] Document any issues, workarounds, or limitations discovered
+- [x] Enable `chat.plugins.enabled` in VS Code
+- [x] Create minimal test plugin with one skill (datahub-dlt) in the central repo
+- [x] Add `marketplace.json` to the central repo
+- [ ] ~~Test: does ADO HTTPS git URL work as marketplace source?~~ — Inconclusive, moved to GitHub
+- [x] Test: can developer install plugin from Extensions sidebar? — Yes, with clone workaround
+- [x] Test: does the installed skill appear in Copilot and work correctly? — Yes, via `/skills` and keyword auto-match
+- [x] Test: can the plugin bundle `.instructions.md`? — **No.** Preamble fallback implemented.
+- [ ] Test: does updating the plugin in the repo propagate to VS Code? — Deferred to Phase 1
+- [ ] Test: plugin install with Copilot CLI for better error diagnostics — Deferred to Phase 1
+- [x] Document any issues, workarounds, or limitations discovered — See setup journal
 
 ### Phase 1: Foundation (Week 2-3)
 

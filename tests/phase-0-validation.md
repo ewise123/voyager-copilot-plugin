@@ -77,13 +77,27 @@ copilot plugin install ./plugins/datahub
 
 | Test | Pass/Fail | Notes |
 |------|-----------|-------|
-| ADO URL as marketplace source | | |
-| Plugin installation | | |
-| Skill discovery | | |
-| .instructions.md bundling | | |
-| Plugin update propagation | | |
-| Copilot CLI diagnostics | | |
+| ADO URL as marketplace source | Inconclusive | Credential/network issues. Moved to GitHub. |
+| Plugin installation | Pass | Manual clone workaround needed for VS Code bug |
+| Skill discovery (explicit /datahub-dlt) | Pass | Skill appears in /skills, reads correctly |
+| Skill auto-match on keywords | Pass | Requires domain-specific keywords in prompt |
+| .instructions.md bundling | Fail | Not supported by plugin format. Preamble fallback works. |
+| Plugin update propagation | Deferred | To be tested in Phase 1 |
+| Copilot CLI diagnostics | Deferred | To be tested in Phase 1 |
 
 ## Issues Discovered
 
-(Document any issues, workarounds, or limitations here)
+1. **VS Code clone bug:** Install button fails with "destination path already exists."
+   VS Code pre-creates parent dirs, then git clone fails. Workaround: manually
+   clone to `%APPDATA%/Code/agentPlugins/github.com/{owner}/{repo}`.
+
+2. **Skill paths cannot traverse outside plugin root:** `../../skills/` does not
+   resolve. Skills must be physically inside `plugins/datahub/skills/`.
+
+3. **.instructions.md not a plugin capability:** Plugin format supports skills,
+   agents, hooks, mcp, commands. No ambient instruction injection.
+
+4. **ADO credential complexity from WSL:** Git credential manager needed non-standard
+   config. Git for Windows was at user-local path, not Program Files.
+
+See `PHASE-0-SETUP-JOURNAL.md` for full details on all issues and workarounds.
