@@ -111,8 +111,8 @@ dev container settings do not work for marketplace configuration.
 ### VS Code `chat.plugins.marketplaces` — Does NOT Work with ADO
 
 Tested multiple ADO URL formats in `chat.plugins.marketplaces`:
-- `https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot`
-- `https://SSAAIAccelerator@dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot`
+- `https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/voyager-copilot-plugin`
+- `https://SSAAIAccelerator@dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/voyager-copilot-plugin`
 - With PAT embedded in URL
 - With `.git` suffix
 
@@ -125,7 +125,7 @@ GitHub SSH, and `file:///`).
 
 ```bash
 npm install -g @github/copilot
-copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot
+copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/voyager-copilot-plugin
 # Output: Marketplace "voyager-copilot-marketplace" added successfully.
 
 copilot plugin install voyager@voyager-copilot-marketplace
@@ -407,7 +407,7 @@ npm install -g @github/copilot  # v1.0.5
 ### ADO marketplace works via CLI
 
 ```bash
-copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot
+copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/voyager-copilot-plugin
 copilot plugin install voyager@voyager-copilot-marketplace
 copilot plugin list
 # Installed plugins:

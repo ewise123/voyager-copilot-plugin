@@ -20,7 +20,7 @@ ADO and point VS Code at the local copy.
 **Step 1: Clone the repo**
 
 ```powershell
-git clone https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot "$env:USERPROFILE\projects\voyager-copilot-plugin"
+git clone https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/voyager-copilot-plugin "$env:USERPROFILE\projects\voyager-copilot-plugin"
 ```
 
 Or run the setup script (if you already have the repo):
