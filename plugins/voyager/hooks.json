@@ -3,8 +3,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "node",
-        "args": ["./hooks/dod-check/check.js"],
+        "command": "node ./hooks/dod-check/check.js",
         "timeout": 60
       }
     ]
