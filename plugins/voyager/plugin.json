@@ -7,8 +7,8 @@
   },
   "skills": [
     "./skills/voyager-dlt",
-    "./skills/voyager-workflow"
+    "./skills/voyager-workflow",
+    "./skills/voyager-dod"
   ],
-  "hooks": "hooks.json",
   "mcpServers": ".mcp.json"
 }
