@@ -2,7 +2,7 @@
 # Run this once to set up the Voyager Copilot Plugin (Option C)
 
 $RepoPath = "$env:USERPROFILE\projects\voyager-copilot-plugin"
-$AdoUrl = "https://dev.azure.com/protectivetfsprod/DataHub/_git/voyager-copilot-plugin"
+$AdoUrl = "https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot"
 
 # Clone if not already present
 if (-not (Test-Path $RepoPath)) {

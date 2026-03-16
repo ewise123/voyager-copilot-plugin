@@ -416,7 +416,7 @@ function voyager-update {
 
     if (-not (Test-Path $RepoPath)) {
         Write-Host "First-time setup: cloning voyager-copilot..." -ForegroundColor Yellow
-        git clone https://dev.azure.com/protectivetfsprod/Voyager/_git/voyager-copilot $RepoPath
+        git clone https://dev.azure.com/SSAAIAccelerator/Voyager/_git/voyager-copilot $RepoPath
     }
 
     Push-Location $RepoPath
@@ -494,7 +494,7 @@ function voyager-update {
     $RepoPath = "$env:USERPROFILE\voyager-copilot"
     if (-not (Test-Path $RepoPath)) {
         Write-Host "First-time setup: cloning voyager-copilot..." -ForegroundColor Yellow
-        git clone https://dev.azure.com/protectivetfsprod/Voyager/_git/voyager-copilot $RepoPath
+        git clone https://dev.azure.com/SSAAIAccelerator/Voyager/_git/voyager-copilot $RepoPath
     }
     Push-Location $RepoPath
     git pull --ff-only

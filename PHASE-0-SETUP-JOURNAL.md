@@ -150,7 +150,7 @@ require a manual `git pull` on the local clone.
 ### Tech lead's ADO setup
 
 The tech lead confirmed ADO works on her machine using:
-`https://dev.azure.com/protectivetfsprod/AIAccelerator/_git/copilot-plugins`
+`https://dev.azure.com/SSAAIAccelerator/AIAccelerator/_git/copilot-plugins`
 
 She verified via `copilot plugin marketplace list` (CLI). It's unclear whether
 it also works in her VS Code `chat.plugins.marketplaces` — need to confirm.
