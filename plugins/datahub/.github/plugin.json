@@ -6,6 +6,6 @@
     "name": "DataHub Platform Team"
   },
   "skills": [
-    "../../skills/datahub-dlt"
+    "./skills/datahub-dlt"
   ]
 }
