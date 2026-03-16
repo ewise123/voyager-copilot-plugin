@@ -1,6 +1,6 @@
 # Phase 0: Plugin Validation Checklist
 
-ADO Repo: https://dev.azure.com/SSAAIAccelerator/DataHub%20Copilot%20Test
+ADO Repo: https://dev.azure.com/SSAAIAccelerator/Voyager%20Copilot%20Test
 
 ## Prerequisites
 
@@ -13,14 +13,14 @@ ADO Repo: https://dev.azure.com/SSAAIAccelerator/DataHub%20Copilot%20Test
 Add to VS Code `settings.json`:
 ```json
 "chat.plugins.marketplaces": [
-    "https://dev.azure.com/SSAAIAccelerator/DataHub%20Copilot%20Test/_git/datahub-copilot-plugin"
+    "https://dev.azure.com/SSAAIAccelerator/Voyager%20Copilot%20Test/_git/voyager-copilot-plugin"
 ]
 ```
 
 - [ ] Does VS Code fetch the marketplace feed without errors?
-- [ ] Does the "datahub" plugin appear when searching `@agentPlugins`?
+- [ ] Does the "voyager" plugin appear when searching `@agentPlugins`?
 - [ ] If ADO URL fails, try alternate formats:
-  - `https://SSAAIAccelerator@dev.azure.com/SSAAIAccelerator/DataHub%20Copilot%20Test/_git/datahub-copilot-plugin`
+  - `https://SSAAIAccelerator@dev.azure.com/SSAAIAccelerator/Voyager%20Copilot%20Test/_git/voyager-copilot-plugin`
   - With `.git` suffix
 - [ ] Document: auth prompt? PAT required? credential manager integration?
 
@@ -28,7 +28,7 @@ Add to VS Code `settings.json`:
 Use `chat.plugins.paths` pointing to local clone:
 ```json
 "chat.plugins.paths": [
-    "/path/to/local/datahub-copilot-plugin"
+    "/path/to/local/voyager-copilot-plugin"
 ]
 ```
 
@@ -43,14 +43,14 @@ Use `chat.plugins.paths` pointing to local clone:
 Open a workspace and ask Copilot:
 > "I need to create a new dlt source for ServiceNow"
 
-- [ ] Copilot matches keywords and reads the datahub-dlt skill
+- [ ] Copilot matches keywords and reads the voyager-dlt skill
 - [ ] Copilot reads the skill's references/ directory
-- [ ] Response follows DataHub conventions (p8e-data-source-* pattern, Key Vault auth, etc.)
+- [ ] Response follows Voyager conventions (p8e-data-source-* pattern, Key Vault auth, etc.)
 
 ## Test 4: .instructions.md Bundling
 
 - [ ] Does Copilot read the .instructions.md from the plugin?
-- [ ] Test: ask "What deployment lanes does DataHub have?" — should answer from ambient context
+- [ ] Test: ask "What deployment lanes does Voyager have?" — should answer from ambient context
 - [ ] If .instructions.md is NOT picked up, plan preamble fallback (bake into each SKILL.md)
 
 ## Test 5: Plugin Update Propagation
@@ -67,7 +67,7 @@ Open a workspace and ask Copilot:
 ```bash
 # If Copilot CLI is available, test for better error messages
 copilot plugin list
-copilot plugin install ./plugins/datahub
+copilot plugin install ./plugins/voyager
 ```
 
 - [ ] CLI provides useful error messages for manifest issues
@@ -79,7 +79,7 @@ copilot plugin install ./plugins/datahub
 |------|-----------|-------|
 | ADO URL as marketplace source | Inconclusive | Credential/network issues. Moved to GitHub. |
 | Plugin installation | Pass | Manual clone workaround needed for VS Code bug |
-| Skill discovery (explicit /datahub-dlt) | Pass | Skill appears in /skills, reads correctly |
+| Skill discovery (explicit /voyager-dlt) | Pass | Skill appears in /skills, reads correctly |
 | Skill auto-match on keywords | Pass | Requires domain-specific keywords in prompt |
 | .instructions.md bundling | Fail | Not supported by plugin format. Preamble fallback works. |
 | Plugin update propagation | Deferred | To be tested in Phase 1 |
@@ -92,7 +92,7 @@ copilot plugin install ./plugins/datahub
    clone to `%APPDATA%/Code/agentPlugins/github.com/{owner}/{repo}`.
 
 2. **Skill paths cannot traverse outside plugin root:** `../../skills/` does not
-   resolve. Skills must be physically inside `plugins/datahub/skills/`.
+   resolve. Skills must be physically inside `plugins/voyager/skills/`.
 
 3. **.instructions.md not a plugin capability:** Plugin format supports skills,
    agents, hooks, mcp, commands. No ambient instruction injection.

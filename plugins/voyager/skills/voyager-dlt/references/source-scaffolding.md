@@ -1,4 +1,4 @@
-# dlt Source Scaffolding — DataHub Conventions
+# dlt Source Scaffolding — Voyager Conventions
 
 > **PLACEHOLDER:** Replace example code with actual patterns from
 > p8e-data-source-nice and p8e-data-source-twilio once available.
@@ -61,7 +61,7 @@ members = [
 """
 dlt source for {Name} API.
 
-Loads {describe what entities} into the DataHub Raw datalake layer.
+Loads {describe what entities} into the Voyager Raw datalake layer.
 Data lands in: {catalog}.raw_{name}.{table_names}
 
 Auth: {OAuth2 | API key | etc.} via Azure Key Vault environment variables.

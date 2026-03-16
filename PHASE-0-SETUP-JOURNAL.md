@@ -1,6 +1,6 @@
 # Phase 0: Setup Journal
 
-Step-by-step record of how the DataHub Copilot Plugin was set up, validated,
+Step-by-step record of how the Voyager Copilot Plugin was set up, validated,
 and the problems encountered along the way. Written during Phase 0 testing
 on 2026-03-15/16.
 
@@ -11,13 +11,13 @@ on 2026-03-15/16.
 Created the central repo with the v5 architecture layout:
 
 ```
-datahub-copilot-plugin/
+voyager-copilot-plugin/
 ├── .github/plugin/marketplace.json    # Marketplace registry
-├── plugins/datahub/
+├── plugins/voyager/
 │   ├── .github/plugin.json            # Plugin manifest (backup location)
 │   ├── plugin.json                    # Plugin manifest (primary)
 │   ├── .instructions.md               # Ambient context (not supported — see Section 7)
-│   └── skills/datahub-dlt/            # Single source of truth for skills
+│   └── skills/voyager-dlt/            # Single source of truth for skills
 │       ├── SKILL.md
 │       ├── UPSTREAM-SOURCE.md
 │       ├── skill-metadata.json
@@ -30,14 +30,14 @@ datahub-copilot-plugin/
 
 1. Skills must live inside the plugin directory. We originally placed skills at
    the repo root (`skills/`) and referenced them from plugin.json with
-   `../../skills/datahub-dlt`. This path did not resolve — the skill never
+   `../../skills/voyager-dlt`. This path did not resolve — the skill never
    appeared in Copilot's `/skills` list. Moving the skill into
-   `plugins/datahub/skills/` and using `./skills/datahub-dlt` fixed it.
+   `plugins/voyager/skills/` and using `./skills/voyager-dlt` fixed it.
 
 2. **Do NOT keep a second copy at the repo root.** We initially kept a root
    `skills/` directory as an "authoring source" alongside the plugin copy.
    VS Code discovered both copies, causing the skill to appear twice in
-   `/skills`. Removed the root copy — `plugins/datahub/skills/` is the single
+   `/skills`. Removed the root copy — `plugins/voyager/skills/` is the single
    source of truth.
 
 ---
@@ -48,37 +48,37 @@ datahub-copilot-plugin/
 
 ```json
 {
-  "name": "datahub-copilot-marketplace",
+  "name": "voyager-copilot-marketplace",
   "owner": {
-    "name": "DataHub Platform Team"
+    "name": "Voyager Platform Team"
   },
   "metadata": {
-    "description": "DataHub Copilot plugin marketplace",
+    "description": "Voyager Copilot plugin marketplace",
     "version": "0.1.0"
   },
   "plugins": [
     {
-      "name": "datahub",
-      "description": "DataHub platform expertise - curated skills for dlt, Dagster, dbt, infrastructure, K8s, and data contracts",
+      "name": "voyager",
+      "description": "Voyager platform expertise - curated skills for dlt, Dagster, dbt, infrastructure, K8s, and data contracts",
       "version": "0.1.0",
-      "source": "./plugins/datahub"
+      "source": "./plugins/voyager"
     }
   ]
 }
 ```
 
-### plugin.json (plugins/datahub/plugin.json)
+### plugin.json (plugins/voyager/plugin.json)
 
 ```json
 {
-  "name": "datahub",
-  "description": "DataHub platform expertise for Copilot - curated skills for dlt, Dagster, dbt, Terraform, K8s, and ODCS data contracts",
+  "name": "voyager",
+  "description": "Voyager platform expertise for Copilot - curated skills for dlt, Dagster, dbt, Terraform, K8s, and ODCS data contracts",
   "version": "0.1.0",
   "author": {
-    "name": "DataHub Platform Team"
+    "name": "Voyager Platform Team"
   },
   "skills": [
-    "./skills/datahub-dlt"
+    "./skills/voyager-dlt"
   ]
 }
 ```
@@ -95,7 +95,7 @@ Add to **user-level** settings.json (not workspace):
 ```json
 "chat.plugins.enabled": true,
 "chat.plugins.marketplaces": [
-    "ewise123/datahub-copilot-plugin"
+    "ewise123/voyager-copilot-plugin"
 ]
 ```
 
@@ -111,8 +111,8 @@ dev container settings do not work for marketplace configuration.
 ### VS Code `chat.plugins.marketplaces` — Does NOT Work with ADO
 
 Tested multiple ADO URL formats in `chat.plugins.marketplaces`:
-- `https://dev.azure.com/SSAAIAccelerator/DataHubCopilot/_git/DataHubCopilot`
-- `https://SSAAIAccelerator@dev.azure.com/SSAAIAccelerator/DataHubCopilot/_git/DataHubCopilot`
+- `https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot`
+- `https://SSAAIAccelerator@dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot`
 - With PAT embedded in URL
 - With `.git` suffix
 
@@ -125,11 +125,11 @@ GitHub SSH, and `file:///`).
 
 ```bash
 npm install -g @github/copilot
-copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/DataHubCopilot/_git/DataHubCopilot
-# Output: Marketplace "datahub-copilot-marketplace" added successfully.
+copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot
+# Output: Marketplace "voyager-copilot-marketplace" added successfully.
 
-copilot plugin install datahub@datahub-copilot-marketplace
-# Output: Plugin "datahub" installed successfully. Installed 1 skill.
+copilot plugin install voyager@voyager-copilot-marketplace
+# Output: Plugin "voyager" installed successfully. Installed 1 skill.
 ```
 
 **However:** CLI-installed plugins live at `~/.copilot/installed-plugins/` and
@@ -140,7 +140,7 @@ are NOT shared with VS Code. VS Code plugins live at
 
 ```json
 "chat.plugins.marketplaces": [
-    "file:///C:/Users/ewise/datahub-copilot-ado"
+    "file:///C:/Users/ewise/voyager-copilot-ado"
 ]
 ```
 
@@ -161,10 +161,10 @@ GitHub is the primary marketplace source for VS Code. ADO is kept as a
 secondary remote.
 
 ```bash
-gh repo create datahub-copilot-plugin --public
+gh repo create voyager-copilot-plugin --public
 ```
 
-GitHub shorthand (`ewise123/datahub-copilot-plugin`) works reliably in
+GitHub shorthand (`ewise123/voyager-copilot-plugin`) works reliably in
 `chat.plugins.marketplaces`.
 
 ### Additional problems encountered during ADO testing
@@ -181,8 +181,8 @@ GitHub shorthand (`ewise123/datahub-copilot-plugin`) works reliably in
    ```
 
 3. **ADO repo naming:** ADO creates a default repo matching the project name.
-   Spaces in project/repo names (e.g., "DataHub Copilot Test") cause URL
-   encoding issues. Renamed to `DataHubCopilot` (no spaces).
+   Spaces in project/repo names (e.g., "Voyager Copilot Test") cause URL
+   encoding issues. Renamed to `VoyagerCopilot` (no spaces).
 
 4. **Connection reset from Windows:** Pushing from Windows PowerShell via the
    WSL filesystem path hit "Recv failure: Connection was reset."
@@ -197,13 +197,13 @@ Every time you click "Install" on the plugin from the Extensions sidebar
 (`@agentPlugins`), VS Code attempts:
 
 ```
-git clone https://github.com/ewise123/datahub-copilot-plugin.git
-  c:\Users\ewise\AppData\Roaming\Code\agentPlugins\github.com\ewise123\datahub-copilot-plugin
+git clone https://github.com/ewise123/voyager-copilot-plugin.git
+  c:\Users\ewise\AppData\Roaming\Code\agentPlugins\github.com\ewise123\voyager-copilot-plugin
 ```
 
 This fails with:
 ```
-fatal: destination path '...\datahub-copilot-plugin' already exists
+fatal: destination path '...\voyager-copilot-plugin' already exists
   and is not an empty directory.
 ```
 
@@ -222,8 +222,8 @@ Manually clone the repo to the expected location:
 
 ```bash
 # From WSL:
-git clone https://github.com/ewise123/datahub-copilot-plugin.git \
-  /mnt/c/Users/ewise/AppData/Roaming/Code/agentPlugins/github.com/ewise123/datahub-copilot-plugin
+git clone https://github.com/ewise123/voyager-copilot-plugin.git \
+  /mnt/c/Users/ewise/AppData/Roaming/Code/agentPlugins/github.com/ewise123/voyager-copilot-plugin
 ```
 
 Then reload VS Code (**Ctrl+Shift+P** -> "Developer: Reload Window"). The
@@ -234,7 +234,7 @@ plugin appears as installed because VS Code finds the repo at its expected path.
 Since the plugin was manually cloned, updates need a manual pull too:
 
 ```bash
-git -C /mnt/c/Users/ewise/AppData/Roaming/Code/agentPlugins/github.com/ewise123/datahub-copilot-plugin pull
+git -C /mnt/c/Users/ewise/AppData/Roaming/Code/agentPlugins/github.com/ewise123/voyager-copilot-plugin pull
 ```
 
 Then reload VS Code. This is a temporary workflow until the VS Code clone bug
@@ -248,7 +248,7 @@ is fixed or we find a better approach.
 
 ```json
 // plugin.json
-"skills": ["../../skills/datahub-dlt"]
+"skills": ["../../skills/voyager-dlt"]
 ```
 
 Paths traversing outside the plugin root directory do not resolve. The skill
@@ -258,11 +258,11 @@ did not appear in `/skills` in Copilot Chat.
 
 ```json
 // plugin.json
-"skills": ["./skills/datahub-dlt"]
+"skills": ["./skills/voyager-dlt"]
 ```
 
 Skills must be physically inside the plugin directory.
-`plugins/datahub/skills/` is the single location — no separate authoring
+`plugins/voyager/skills/` is the single location — no separate authoring
 directory. A root `skills/` directory was initially kept as an authoring source,
 but VS Code discovered both copies and showed the skill twice in `/skills`.
 The root copy was removed.
@@ -273,13 +273,13 @@ The root copy was removed.
 
 ### What we tried
 
-Placed `.instructions.md` at `plugins/datahub/.instructions.md` containing the
-DataHub platform mental model (~80 words covering deployment lanes and datalake
+Placed `.instructions.md` at `plugins/voyager/.instructions.md` containing the
+Voyager platform mental model (~80 words covering deployment lanes and datalake
 layers).
 
 ### What happened
 
-Copilot did not read the file. When asked "What deployment lanes does DataHub
+Copilot did not read the file. When asked "What deployment lanes does Voyager
 have?" without invoking a skill, Copilot answered from its training data, not
 from the plugin's .instructions.md.
 
@@ -302,12 +302,12 @@ Baked the platform context directly into each skill's SKILL.md as a
 whenever a skill is invoked, but NOT on general questions.
 
 This is acceptable because:
-- The context only matters during DataHub work
-- DataHub work triggers a skill via keyword matching
+- The context only matters during Voyager work
+- Voyager work triggers a skill via keyword matching
 - General questions without skill context are not the target use case
 
 **Open decision:** If truly ambient context is needed later, developers could
-be asked to place a `datahub-context.instructions.md` in their
+be asked to place a `voyager-context.instructions.md` in their
 `~/.github/instructions/` directory as a one-time manual step outside the
 plugin. This hasn't been necessary yet.
 
@@ -321,7 +321,7 @@ plugin. This hasn't been necessary yet.
 |--------|--------------|-------|
 | "I need to create a new dlt source for ServiceNow" | Mixed | First test: No (Copilot saw skill but didn't invoke). Later test after removing duplicate: Yes (read SKILL.md and followed conventions) |
 | "I need to create a new dlt source for the ServiceNow API using the p8e-data-source pattern" | **Yes** | Domain-specific keywords triggered auto-match |
-| "/datahub-dlt [any prompt]" | **Yes** | Explicit invocation always works |
+| "/voyager-dlt [any prompt]" | **Yes** | Explicit invocation always works |
 
 ### How it works
 
@@ -333,7 +333,7 @@ p8e-data-source, Raw datalake layer.
 
 ### Recommendation
 
-Tell developers they can always use `/datahub-dlt` for explicit invocation.
+Tell developers they can always use `/voyager-dlt` for explicit invocation.
 Auto-matching works when prompts contain enough domain keywords, but isn't
 guaranteed for vague requests.
 
@@ -343,13 +343,13 @@ guaranteed for vague requests.
 
 ### The problem
 
-VS Code discovered skills in both `skills/datahub-dlt/` (repo root) and
-`plugins/datahub/skills/datahub-dlt/` (inside plugin). The skill appeared
+VS Code discovered skills in both `skills/voyager-dlt/` (repo root) and
+`plugins/voyager/skills/voyager-dlt/` (inside plugin). The skill appeared
 twice in `/skills` in Copilot Chat.
 
 ### Fix
 
-Removed the root `skills/` directory entirely. `plugins/datahub/skills/` is
+Removed the root `skills/` directory entirely. `plugins/voyager/skills/` is
 the single source of truth.
 
 ---
@@ -384,7 +384,7 @@ mechanism at all (preview feature limitation):
 2. Notify team via Teams/Slack
 3. Devs run:
    ```
-   git -C "%APPDATA%\Code\agentPlugins\github.com\ewise123\datahub-copilot-plugin" pull
+   git -C "%APPDATA%\Code\agentPlugins\github.com\ewise123\voyager-copilot-plugin" pull
    ```
 4. Reload VS Code (Ctrl+Shift+P → "Developer: Reload Window")
 
@@ -407,11 +407,11 @@ npm install -g @github/copilot  # v1.0.5
 ### ADO marketplace works via CLI
 
 ```bash
-copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/DataHubCopilot/_git/DataHubCopilot
-copilot plugin install datahub@datahub-copilot-marketplace
+copilot plugin marketplace add https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/VoyagerCopilot
+copilot plugin install voyager@voyager-copilot-marketplace
 copilot plugin list
 # Installed plugins:
-#   datahub@datahub-copilot-marketplace (v0.2.0)
+#   voyager@voyager-copilot-marketplace (v0.2.0)
 ```
 
 ### CLI and VS Code are separate plugin systems

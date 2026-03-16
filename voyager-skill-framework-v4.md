@@ -1,4 +1,4 @@
-# DataHub Copilot Plugin
+# Voyager Copilot Plugin
 ## Architecture, Distribution, and Maintenance (v4)
 
 ---
@@ -9,7 +9,7 @@ v3 designed a two-tier system: routing rules in `.instructions.md` dispatch to s
 
 The agent layer was adding complexity that Copilot actively fights against. v4 drops agents and routing entirely.
 
-**The framework is now a plugin** — an installable, versioned package of curated skills and reference knowledge that ships DataHub expertise to every developer's IDE. The "code" is markdown files. The "runtime" is Copilot's skill discovery. The "package manager" is a setup script, an ADO pipeline, and a drift scanner. A developer runs `datahub-update`, restarts VS Code, and Copilot knows how DataHub works. They don't need to know about skill directories, reference files, or how the content is structured.
+**The framework is now a plugin** — an installable, versioned package of curated skills and reference knowledge that ships Voyager expertise to every developer's IDE. The "code" is markdown files. The "runtime" is Copilot's skill discovery. The "package manager" is a setup script, an ADO pipeline, and a drift scanner. A developer runs `voyager-update`, restarts VS Code, and Copilot knows how Voyager works. They don't need to know about skill directories, reference files, or how the content is structured.
 
 Further testing confirmed that Copilot reads multiple skills in a single interaction when a task spans domains — eliminating the last argument for an agent or orchestration layer. The simplest possible architecture is also the correct one.
 
@@ -24,8 +24,8 @@ This makes the framework simpler to build and maintain, but shifts the critical 
 | Skills auto-discovered from `~/.copilot/skills/` with nested reference subdirectories | Created test skill with nested references containing a unique phrase not in any training data | ✅ Copilot returned the planted phrase — skill discovery with nested refs works |
 | User-level agents roam across workspaces | Agent in `prompts/` tested across different ADO-hosted workspaces | ✅ Works regardless of which workspace is open |
 | Copilot reads skills based on keyword matching without routing | Installed dagster-expert skill, told Copilot "I need to do dagster work" with no routing table in place | ✅ Copilot matched keywords directly to skill and read it — confirms skills-only architecture works |
-| Copilot reads multiple skills in a single interaction | Installed datahub-dlt and dagster-expert skills, prompted: "Create a new dlt source for ServiceNow and wire it up as a Dagster asset on a daily schedule" | ✅ Copilot identified both domains, read both skill files, and combined knowledge from both. No agent or orchestration layer needed. |
-| Copilot respects skill constraints in unfamiliar workspace | Same multi-skill test run in a non-DataHub repo | ✅ Copilot attempted to find expected workspace files (sources/p8e-data-source-*/, pyproject.toml) and correctly identified they were missing — constraints are being followed |
+| Copilot reads multiple skills in a single interaction | Installed voyager-dlt and dagster-expert skills, prompted: "Create a new dlt source for ServiceNow and wire it up as a Dagster asset on a daily schedule" | ✅ Copilot identified both domains, read both skill files, and combined knowledge from both. No agent or orchestration layer needed. |
+| Copilot respects skill constraints in unfamiliar workspace | Same multi-skill test run in a non-Voyager repo | ✅ Copilot attempted to find expected workspace files (sources/p8e-data-source-*/, pyproject.toml) and correctly identified they were missing — constraints are being followed |
 
 The multi-skill test is the most important validation. It confirms that Copilot natively handles cross-domain tasks without agents, routing tables, or orchestration — the simplest possible architecture works.
 
@@ -33,9 +33,9 @@ The multi-skill test is the most important validation. It confirms that Copilot 
 
 ## 3. The Problem This Solves
 
-Developers working in the DataHub platform need to understand how 15 repositories, three deployment paths, and a dozen tools connect together. Today, that knowledge lives in people's heads, scattered docs, and tribal knowledge. When a developer needs to add a new dlt source, fix a Dagster deploy, or create an infrastructure stack, they spend time figuring out which repos to touch, which templates to follow, and which patterns to use.
+Developers working in the Voyager platform need to understand how 15 repositories, three deployment paths, and a dozen tools connect together. Today, that knowledge lives in people's heads, scattered docs, and tribal knowledge. When a developer needs to add a new dlt source, fix a Dagster deploy, or create an infrastructure stack, they spend time figuring out which repos to touch, which templates to follow, and which patterns to use.
 
-This plugin puts that knowledge directly into the developer's IDE, scoped to exactly what they're working on. Install the plugin, and Copilot becomes a DataHub expert.
+This plugin puts that knowledge directly into the developer's IDE, scoped to exactly what they're working on. Install the plugin, and Copilot becomes a Voyager expert.
 
 ---
 
@@ -45,38 +45,38 @@ This plugin puts that knowledge directly into the developer's IDE, scoped to exa
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  USER LEVEL (distributed via central repo)                              │
 │                                                                         │
-│  .instructions.md            — slim DataHub mental model (read on every │
+│  .instructions.md            — slim Voyager mental model (read on every │
 │  Location: prompts/            interaction): deployment lanes, datalake  │
 │                                layers, repo count. ~150 words.          │
 │                                                                         │
 │  Skills + References                                                    │
 │  Location: C:\Users\{user}\.copilot\skills\                           │
 │                                                                         │
-│  datahub-dagster/          — Dagster + DataHub orchestration patterns    │
+│  voyager-dagster/          — Dagster + Voyager orchestration patterns    │
 │    SKILL.md                — complete skill: knowledge + constraints     │
 │    references/             — supporting detail files                     │
 │                                                                         │
-│  datahub-dlt/              — dlt + DataHub ingestion patterns            │
+│  voyager-dlt/              — dlt + Voyager ingestion patterns            │
 │    SKILL.md                                                             │
 │    references/                                                          │
 │                                                                         │
-│  datahub-dbt/              — dbt + DataHub transformation patterns       │
+│  voyager-dbt/              — dbt + Voyager transformation patterns       │
 │    SKILL.md                                                             │
 │    references/                                                          │
 │                                                                         │
-│  datahub-infra/            — Terragrunt/OpenTofu + DataHub IaC          │
+│  voyager-infra/            — Terragrunt/OpenTofu + Voyager IaC          │
 │    SKILL.md                                                             │
 │    references/                                                          │
 │                                                                         │
-│  datahub-k8s/              — K8s/AKS + DataHub deployment               │
+│  voyager-k8s/              — K8s/AKS + Voyager deployment               │
 │    SKILL.md                                                             │
 │    references/                                                          │
 │                                                                         │
-│  datahub-contracts/        — ODCS data contracts                        │
+│  voyager-contracts/        — ODCS data contracts                        │
 │    SKILL.md                                                             │
 │    references/                                                          │
 │                                                                         │
-│  datahub-platform/         — Cross-cutting reference files (NOT a skill) │
+│  voyager-platform/         — Cross-cutting reference files (NOT a skill) │
 │    references/             — no SKILL.md; domain skills read these by   │
 │      architecture.md         path when they need platform context       │
 │      datalake-layers.md                                                 │
@@ -86,7 +86,7 @@ This plugin puts that knowledge directly into the developer's IDE, scoped to exa
 │      template-map.md                                                    │
 │      pr-workflow.md                                                     │
 │                                                                         │
-│  datahub-version.json      — installed version + timestamp              │
+│  voyager-version.json      — installed version + timestamp              │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  WORKSPACE LEVEL (per-repo, version controlled in ADO)                  │
 │  Location: {repo}/.github/                                              │
@@ -99,12 +99,12 @@ This plugin puts that knowledge directly into the developer's IDE, scoped to exa
 ### Three Layers of Context
 
 **Layer 1: .instructions.md (every interaction)**
-A slim (~150 word) DataHub mental model that Copilot reads on every interaction. Gives Copilot the 30-second orientation: DataHub has 15 repos across three deployment lanes, the datalake has three layers, here's the vocabulary. This is NOT a routing table — it's ambient context so that any Copilot interaction has baseline DataHub awareness.
+A slim (~150 word) Voyager mental model that Copilot reads on every interaction. Gives Copilot the 30-second orientation: Voyager has 15 repos across three deployment lanes, the datalake has three layers, here's the vocabulary. This is NOT a routing table — it's ambient context so that any Copilot interaction has baseline Voyager awareness.
 
 ```markdown
-# DataHub Platform Context
+# Voyager Platform Context
 
-DataHub is a data platform with 15 repos across three deployment lanes:
+Voyager is a data platform with 15 repos across three deployment lanes:
 - **Data pipelines:** dlt (ingestion → Raw) + dbt (transform → Prep/Prod),
   orchestrated by Dagster, deployed to Dagster Cloud
 - **Services:** APIs and tools deployed to AKS via Helm + FluxCD
@@ -116,22 +116,22 @@ The datalake has three layers in Databricks Unity Catalog:
 - **Prod:** dbt mart models, consumer-facing
 ```
 
-Note: the `.instructions.md` intentionally does NOT point to the platform reference directory. Including a path like "detailed files are at ~/.copilot/skills/datahub-platform/references/" would invite Copilot to proactively read those files on every interaction. Instead, only domain skills contain those paths, so platform references are only loaded when a matching skill asks for them.
+Note: the `.instructions.md` intentionally does NOT point to the platform reference directory. Including a path like "detailed files are at ~/.copilot/skills/voyager-platform/references/" would invite Copilot to proactively read those files on every interaction. Instead, only domain skills contain those paths, so platform references are only loaded when a matching skill asks for them.
 
 **Layer 2: Domain skills (matched by task keywords)**
-Curated skills that Copilot discovers and reads when keywords match. Each skill contains upstream tool knowledge filtered through DataHub conventions, constraints, approach patterns, and output guidance.
+Curated skills that Copilot discovers and reads when keywords match. Each skill contains upstream tool knowledge filtered through Voyager conventions, constraints, approach patterns, and output guidance.
 
 **Layer 3: Per-repo instructions (workspace-scoped)**
 Light, stable facts about the specific repo the developer has open. File structure, coding standards, what not to do.
 
 ### How It Works
 
-1. Developer opens any DataHub repo in VS Code
-2. Copilot reads `.instructions.md` (user-level) — gets the DataHub mental model
+1. Developer opens any Voyager repo in VS Code
+2. Copilot reads `.instructions.md` (user-level) — gets the Voyager mental model
 3. Copilot reads `.github/copilot-instructions.md` (workspace-level) — gets repo-specific context
 4. Developer describes a task in Copilot Chat
 5. Copilot matches task keywords to a domain skill and reads it
-6. The skill provides: domain knowledge, DataHub-specific constraints, workspace files to examine, approach, and output guidance
+6. The skill provides: domain knowledge, Voyager-specific constraints, workspace files to examine, approach, and output guidance
 7. The skill may direct Copilot to read specific platform reference files for cross-cutting context
 8. Developer reviews the result
 
@@ -140,8 +140,8 @@ Light, stable facts about the specific repo the developer has open. File structu
 Developer types: "I need to add a new dlt source for ServiceNow with incidents and change requests"
 
 Copilot automatically:
-- Matches "dlt source" → reads `datahub-dlt` skill
-- Gets upstream dlt knowledge (API patterns, @dlt.source conventions) already filtered for DataHub
+- Matches "dlt source" → reads `voyager-dlt` skill
+- Gets upstream dlt knowledge (API patterns, @dlt.source conventions) already filtered for Voyager
 - Gets platform context (Raw layer conventions, repo structure)
 - Reads existing sources in workspace (p8e-data-source-* patterns)
 - Returns scaffolded source package with all files, tests, and next steps
@@ -158,20 +158,20 @@ Every skill follows the same internal structure. This is critical — the skill 
 
 ```markdown
 ---
-name: datahub-{domain}
+name: voyager-{domain}
 description: >
   {Keyword-rich description that matches how developers describe tasks.
   This is the primary matching surface — get the keywords right.}
 ---
 
-# DataHub {Domain} Expert
+# Voyager {Domain} Expert
 
-You are a {domain} expert specialized for the DataHub platform.
+You are a {domain} expert specialized for the Voyager platform.
 
 ## CRITICAL: Read reference files before answering. Never answer from memory.
 
 Read from this skill's references/ directory for detailed knowledge.
-Read from ~/.copilot/skills/datahub-platform/references/ for cross-cutting
+Read from ~/.copilot/skills/voyager-platform/references/ for cross-cutting
 platform context when the task involves deployment, architecture, or datalake layers.
 
 ## Constraints
@@ -208,16 +208,16 @@ The skill description is the keyword magnet — it's what Copilot matches on. Th
 
 ### Curating Upstream Knowledge
 
-Each skill bakes in upstream tool knowledge rather than pointing to a separate upstream skill directory. This prevents the problem we observed — Copilot finding a raw upstream skill and using it without DataHub context.
+Each skill bakes in upstream tool knowledge rather than pointing to a separate upstream skill directory. This prevents the problem we observed — Copilot finding a raw upstream skill and using it without Voyager context.
 
 How to curate:
 1. Start with the vendor's upstream skill content
-2. Remove anything that contradicts DataHub conventions
-3. Add DataHub-specific constraints and patterns
+2. Remove anything that contradicts Voyager conventions
+3. Add Voyager-specific constraints and patterns
 4. Put detailed reference material in the skill's `references/` directory
 5. The SKILL.md points to references but contains the constraints and approach directly
 
-When upstream tools release updates, the relevant skill's references get updated — but always filtered through DataHub conventions first.
+When upstream tools release updates, the relevant skill's references get updated — but always filtered through Voyager conventions first.
 
 ### Skill Sizing
 
@@ -235,19 +235,19 @@ Platform knowledge is NOT a skill. It lives in two places:
 
 1. **`.instructions.md`** — the slim mental model (~150 words) that Copilot reads on every interaction. This gives baseline orientation without consuming attention on irrelevant detail.
 
-2. **`~/.copilot/skills/datahub-platform/references/`** — detailed reference files that domain skills point to by path when they need deeper platform context. There is no SKILL.md here — these files are only read when a domain skill explicitly directs Copilot to them.
+2. **`~/.copilot/skills/voyager-platform/references/`** — detailed reference files that domain skills point to by path when they need deeper platform context. There is no SKILL.md here — these files are only read when a domain skill explicitly directs Copilot to them.
 
 Domain skills reference platform files like this:
 
 ```
 When the task involves deployment configuration, read:
-~/.copilot/skills/datahub-platform/references/deployment-dagster.md
+~/.copilot/skills/voyager-platform/references/deployment-dagster.md
 
 When creating assets that land in Raw/Prep/Prod, read:
-~/.copilot/skills/datahub-platform/references/datalake-layers.md
+~/.copilot/skills/voyager-platform/references/datalake-layers.md
 ```
 
-This prevents datahub-platform from competing with domain skills for keyword matches. Copilot never picks up "architecture" or "deployment" and lands on a generic platform overview instead of the domain skill that can actually help.
+This prevents voyager-platform from competing with domain skills for keyword matches. Copilot never picks up "architecture" or "deployment" and lands on a generic platform overview instead of the domain skill that can actually help.
 
 ---
 
@@ -271,7 +271,7 @@ Single source of truth for all skills and repo instruction files. Developers don
 ### Structure
 
 ```
-datahub-copilot/                        (ADO repo)
+voyager-copilot/                        (ADO repo)
 │
 ├── README.md                           # What this is, how to set up
 ├── MAINTENANCE.md                      # How to update skills
@@ -281,42 +281,42 @@ datahub-copilot/                        (ADO repo)
 ├── scan.ps1                            # Drift scanner (see Keeping Content Fresh)
 │
 ├── prompts/                            # → AppData\Roaming\Code\User\prompts\
-│   └── .instructions.md                # Slim DataHub mental model
+│   └── .instructions.md                # Slim Voyager mental model
 │
 ├── skills/                             # → .copilot\skills\
-│   ├── datahub-dagster/
+│   ├── voyager-dagster/
 │   │   ├── SKILL.md
 │   │   ├── UPSTREAM-SOURCE.md          # Tracks vendor skill version/date
 │   │   ├── skill-metadata.json         # Tracked versions for drift scanner
 │   │   └── references/
 │   │
-│   ├── datahub-dlt/
+│   ├── voyager-dlt/
 │   │   ├── SKILL.md
 │   │   ├── UPSTREAM-SOURCE.md
 │   │   ├── skill-metadata.json
 │   │   └── references/
 │   │
-│   ├── datahub-dbt/
+│   ├── voyager-dbt/
 │   │   ├── SKILL.md
 │   │   ├── UPSTREAM-SOURCE.md
 │   │   ├── skill-metadata.json
 │   │   └── references/
 │   │
-│   ├── datahub-infra/
+│   ├── voyager-infra/
 │   │   ├── SKILL.md
 │   │   ├── UPSTREAM-SOURCE.md
 │   │   ├── skill-metadata.json
 │   │   └── references/
 │   │
-│   ├── datahub-k8s/
+│   ├── voyager-k8s/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │
-│   ├── datahub-contracts/
+│   ├── voyager-contracts/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │
-│   └── datahub-platform/              # NOT a skill — no SKILL.md
+│   └── voyager-platform/              # NOT a skill — no SKILL.md
 │       └── references/                # Read by domain skills via path
 │           ├── architecture.md
 │           ├── datalake-layers.md
@@ -328,7 +328,7 @@ datahub-copilot/                        (ADO repo)
 │
 ├── repo-instructions/                  # Source for each repo's copilot-instructions.md
 │   ├── data-api.md
-│   ├── datahub-data-platform-repo.md
+│   ├── voyager-data-platform-repo.md
 │   ├── data-transformation.md
 │   └── ... (one per repo)
 │
@@ -363,7 +363,7 @@ The central repo maintains `version.json`:
 {
   "version": "2.1.0",
   "updated": "2026-03-10T14:30:00Z",
-  "changelog": "Updated datahub-dagster for dg CLI v0.28, added branch catalog isolation docs"
+  "changelog": "Updated voyager-dagster for dg CLI v0.28, added branch catalog isolation docs"
 }
 ```
 
@@ -372,9 +372,9 @@ The central repo maintains `version.json`:
 - **Minor** (2.1.0): New skill added, significant content update to existing skill, new platform reference file
 - **Patch** (2.0.1): Typo fixes, minor clarifications, wording improvements
 
-The changelog matters. When a developer sees the staleness warning and runs `datahub-update`, the changelog in the notification tells them whether to care. "Updated datahub-dagster for dg CLI v0.28, added branch catalog isolation docs" is useful. "Various improvements" is not.
+The changelog matters. When a developer sees the staleness warning and runs `voyager-update`, the changelog in the notification tells them whether to care. "Updated voyager-dagster for dg CLI v0.28, added branch catalog isolation docs" is useful. "Various improvements" is not.
 
-This file is copied to `~/.copilot/skills/datahub-version.json` on every install/update. Skills reference it for staleness warnings.
+This file is copied to `~/.copilot/skills/voyager-version.json` on every install/update. Skills reference it for staleness warnings.
 
 ### Distribution Layers
 
@@ -387,7 +387,7 @@ An ADO pipeline in the central repo triggers on merge to `main`. It doesn't push
 Options (choose based on team communication patterns):
 
 **Option A: Teams/Slack webhook**
-Pipeline posts to a team channel: "DataHub Copilot skills updated to v2.1.0 — run `datahub-update` to install. Changes: updated datahub-dagster for dg CLI v0.28."
+Pipeline posts to a team channel: "Voyager Copilot skills updated to v2.1.0 — run `voyager-update` to install. Changes: updated voyager-dagster for dg CLI v0.28."
 
 **Option B: ADO dashboard widget**
 Pipeline updates a shared dashboard showing current version, last update date, and changelog. Developers check this as part of their workflow.
@@ -404,19 +404,19 @@ Developers run updates via a VS Code task or terminal alias. The setup script re
 ```powershell
 # setup.ps1 registers this alias in the user's PowerShell profile
 # After first setup, developer just runs:
-datahub-update
+voyager-update
 ```
 
-The `datahub-update` command:
+The `voyager-update` command:
 
 ```powershell
-# datahub-update function (added to PowerShell profile by setup.ps1)
-function datahub-update {
-    $RepoPath = "$env:USERPROFILE\datahub-copilot"
+# voyager-update function (added to PowerShell profile by setup.ps1)
+function voyager-update {
+    $RepoPath = "$env:USERPROFILE\voyager-copilot"
 
     if (-not (Test-Path $RepoPath)) {
-        Write-Host "First-time setup: cloning datahub-copilot..." -ForegroundColor Yellow
-        git clone https://dev.azure.com/protectivetfsprod/DataHub/_git/datahub-copilot $RepoPath
+        Write-Host "First-time setup: cloning voyager-copilot..." -ForegroundColor Yellow
+        git clone https://dev.azure.com/protectivetfsprod/Voyager/_git/voyager-copilot $RepoPath
     }
 
     Push-Location $RepoPath
@@ -438,11 +438,11 @@ Every skill includes a staleness check instruction at the top of its body:
 ```markdown
 ## Version Check
 
-Before answering, read ~/.copilot/skills/datahub-version.json.
+Before answering, read ~/.copilot/skills/voyager-version.json.
 If the "updated" timestamp is more than 14 days old, prepend your response with:
 
-> ⚠️ **Your DataHub skills may be outdated (last updated {date}).**
-> Run `datahub-update` in your terminal to get the latest version.
+> ⚠️ **Your Voyager skills may be outdated (last updated {date}).**
+> Run `voyager-update` in your terminal to get the latest version.
 
 Then continue answering normally.
 ```
@@ -452,7 +452,7 @@ This is the safety net. Even if a developer ignores notifications and never runs
 ### Setup Script (setup.ps1)
 
 ```powershell
-# DataHub Copilot Plugin Setup
+# Voyager Copilot Plugin Setup
 # Installs curated skills, platform context, and registers update command
 
 $ErrorActionPreference = "Stop"
@@ -462,7 +462,7 @@ $PromptsDir = "$env:APPDATA\Code\User\prompts"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProfilePath = $PROFILE.CurrentUserCurrentHost
 
-Write-Host "DataHub Copilot Plugin Setup" -ForegroundColor Cyan
+Write-Host "Voyager Copilot Plugin Setup" -ForegroundColor Cyan
 Write-Host "=============================" -ForegroundColor Cyan
 
 # Create directories
@@ -470,31 +470,31 @@ New-Item -ItemType Directory -Path $SkillsDir -Force | Out-Null
 New-Item -ItemType Directory -Path $PromptsDir -Force | Out-Null
 
 # Clean previous install (remove old/renamed skills)
-# Only removes datahub-* directories and datahub-version.json — leaves non-DataHub skills untouched
-Write-Host "Cleaning previous DataHub skills..." -ForegroundColor Yellow
-Get-ChildItem -Path $SkillsDir -Directory -Filter "datahub-*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
-Remove-Item "$SkillsDir\datahub-version.json" -Force -ErrorAction SilentlyContinue
+# Only removes voyager-* directories and voyager-version.json — leaves non-Voyager skills untouched
+Write-Host "Cleaning previous Voyager skills..." -ForegroundColor Yellow
+Get-ChildItem -Path $SkillsDir -Directory -Filter "voyager-*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+Remove-Item "$SkillsDir\voyager-version.json" -Force -ErrorAction SilentlyContinue
 
 # Copy skills and platform references
 Write-Host "Installing skills..." -ForegroundColor Yellow
 Copy-Item "$ScriptDir\skills\*" -Destination $SkillsDir -Force -Recurse
 
-# Copy .instructions.md (DataHub mental model)
+# Copy .instructions.md (Voyager mental model)
 Write-Host "Installing platform context..." -ForegroundColor Yellow
 Copy-Item "$ScriptDir\prompts\.instructions.md" -Destination "$PromptsDir\.instructions.md" -Force
 
 # Write version file
-Copy-Item "$ScriptDir\version.json" -Destination "$SkillsDir\datahub-version.json" -Force
+Copy-Item "$ScriptDir\version.json" -Destination "$SkillsDir\voyager-version.json" -Force
 
-# Register datahub-update command (idempotent)
+# Register voyager-update command (idempotent)
 $UpdateFunc = @'
 
-# DataHub Copilot Plugin Update
-function datahub-update {
-    $RepoPath = "$env:USERPROFILE\datahub-copilot"
+# Voyager Copilot Plugin Update
+function voyager-update {
+    $RepoPath = "$env:USERPROFILE\voyager-copilot"
     if (-not (Test-Path $RepoPath)) {
-        Write-Host "First-time setup: cloning datahub-copilot..." -ForegroundColor Yellow
-        git clone https://dev.azure.com/protectivetfsprod/DataHub/_git/datahub-copilot $RepoPath
+        Write-Host "First-time setup: cloning voyager-copilot..." -ForegroundColor Yellow
+        git clone https://dev.azure.com/protectivetfsprod/Voyager/_git/voyager-copilot $RepoPath
     }
     Push-Location $RepoPath
     git pull --ff-only
@@ -512,11 +512,11 @@ if (-not (Test-Path $ProfilePath)) {
     New-Item -ItemType File -Path $ProfilePath -Force | Out-Null
 }
 $ProfileContent = Get-Content $ProfilePath -Raw -ErrorAction SilentlyContinue
-if ($ProfileContent -notmatch 'function datahub-update') {
+if ($ProfileContent -notmatch 'function voyager-update') {
     Add-Content -Path $ProfilePath -Value $UpdateFunc
-    Write-Host "Registered 'datahub-update' command." -ForegroundColor Yellow
+    Write-Host "Registered 'voyager-update' command." -ForegroundColor Yellow
 } else {
-    Write-Host "'datahub-update' command already registered." -ForegroundColor Gray
+    Write-Host "'voyager-update' command already registered." -ForegroundColor Gray
 }
 
 Write-Host ""
@@ -524,7 +524,7 @@ Write-Host "Setup complete!" -ForegroundColor Green
 Write-Host "  Skills:           $SkillsDir" -ForegroundColor Gray
 Write-Host "  Platform context: $PromptsDir\.instructions.md" -ForegroundColor Gray
 Write-Host ""
-Write-Host "To update in the future, run: datahub-update" -ForegroundColor Yellow
+Write-Host "To update in the future, run: voyager-update" -ForegroundColor Yellow
 Write-Host "Restart VS Code to activate." -ForegroundColor Yellow
 ```
 
@@ -540,7 +540,7 @@ ADO pipeline fires ──► Team notification (Teams/Slack/email)
                     Developer sees notification
                               │
                               ▼
-                    Developer runs: datahub-update
+                    Developer runs: voyager-update
                               │
                               ▼
                     git pull + setup.ps1 copies skills
@@ -557,20 +557,20 @@ Skills go stale (>14 days)
 Every Copilot response shows ⚠️ staleness warning
         │
         ▼
-Developer runs: datahub-update
+Developer runs: voyager-update
 ```
 
 ---
 
 ## 9. Keeping Content Fresh — The Drift Scanner
 
-The plugin is a snapshot of how DataHub works at a point in time. The 15 working repos keep evolving — dependencies get bumped, file structures change, new repos appear. The drift scanner is a scheduled ADO pipeline that checks whether reality has drifted from what the skills describe, and produces a report telling the tech lead what needs attention.
+The plugin is a snapshot of how Voyager works at a point in time. The 15 working repos keep evolving — dependencies get bumped, file structures change, new repos appear. The drift scanner is a scheduled ADO pipeline that checks whether reality has drifted from what the skills describe, and produces a report telling the tech lead what needs attention.
 
 ### What the Scanner Checks
 
 **Dependency versions:** Parses `pyproject.toml`, `package.json`, and similar files across repos. Compares pinned versions of key libraries (dlt, dagster, dbt-core, etc.) against what the skills document. Flags mismatches.
 
-Example output: `datahub-data-platform-repo bumped dlt from 1.14.1 to 1.16.0 — datahub-dlt skill references 1.14.1`
+Example output: `voyager-data-platform-repo bumped dlt from 1.14.1 to 1.16.0 — voyager-dlt skill references 1.14.1`
 
 **Key file changes:** Tracks modification dates of files that skills reference — `deploy.yaml`, pipeline YAML, `pyproject.toml`, directory structures. If a file changed since the last skill update, it might mean the skill's instructions are stale.
 
@@ -578,7 +578,7 @@ Example output: `data-api/.azuredevops/pipelines/deploy.yaml modified 2026-03-08
 
 **File structure drift:** Compares the actual directory tree of each repo against what `copilot-instructions.md` describes. Flags new top-level directories, missing expected directories, or renamed paths.
 
-Example output: `datahub-data-platform-repo has new directory sources/p8e-data-source-jira/ not covered by any skill reference`
+Example output: `voyager-data-platform-repo has new directory sources/p8e-data-source-jira/ not covered by any skill reference`
 
 **New or removed repos:** Checks the ADO project for repos that don't have a corresponding `copilot-instructions.md` in the central repo, or instructions that reference repos that no longer exist.
 
@@ -610,8 +610,8 @@ The scanner reads this file alongside `scan-config.json` to produce version drif
 {
   "repos": [
     {
-      "name": "datahub-data-platform-repo",
-      "ado_project": "DataHub",
+      "name": "voyager-data-platform-repo",
+      "ado_project": "Voyager",
       "tracked_dependencies": {
         "pyproject.toml": ["dlt", "dagster", "dagster-dlt", "dagster-dbt"]
       },
@@ -625,11 +625,11 @@ The scanner reads this file alongside `scan-config.json` to produce version drif
         "dbt/",
         ".azuredevops/pipelines/"
       ],
-      "related_skills": ["datahub-dlt", "datahub-dagster", "datahub-dbt"]
+      "related_skills": ["voyager-dlt", "voyager-dagster", "voyager-dbt"]
     },
     {
       "name": "data-api",
-      "ado_project": "DataHub",
+      "ado_project": "Voyager",
       "tracked_dependencies": {
         "package.json": ["express", "@azure/identity"]
       },
@@ -642,7 +642,7 @@ The scanner reads this file alongside `scan-config.json` to produce version drif
         "charts/",
         ".azuredevops/pipelines/"
       ],
-      "related_skills": ["datahub-k8s"]
+      "related_skills": ["voyager-k8s"]
     }
   ],
   "scan_schedule": "weekly",
@@ -665,12 +665,12 @@ The scanner runs as a scheduled ADO pipeline (weekly recommended, bi-weekly acce
 ### Example Drift Report
 
 ```markdown
-# DataHub Plugin Drift Report — 2026-03-12
+# Voyager Plugin Drift Report — 2026-03-12
 
 ## 🔴 Action Required
 
-**datahub-data-platform-repo**
-- dlt version bumped: 1.14.1 → 1.16.0 (affects datahub-dlt skill)
+**voyager-data-platform-repo**
+- dlt version bumped: 1.14.1 → 1.16.0 (affects voyager-dlt skill)
 - New source directory: sources/p8e-data-source-jira/ (not in any skill reference)
 
 **data-api**
@@ -709,7 +709,7 @@ Tech lead reviews report
                                       │
                                       ▼
                                 Normal distribution kicks in
-                                (notification → datahub-update → VS Code restart)
+                                (notification → voyager-update → VS Code restart)
 ```
 
 ---
@@ -734,19 +734,19 @@ This is lower priority than skill distribution because repo instructions change 
 
 | Skill | Domain | Key Knowledge | Curated From |
 |-------|--------|---------------|--------------|
-| datahub-dagster | Orchestration | Dagster API, dg CLI, assets, sensors, deploy.yaml chain, branch deployments | Dagster upstream skill + DataHub deploy conventions |
-| datahub-dlt | API ingestion | dlt API, @dlt.source/@dlt.resource, incremental loading, Dagster-dlt bridge | dlthub upstream + DataHub source patterns |
-| datahub-dbt | Transformation | dbt CLI, models, sources, testing, Raw→Prep→Prod layering | dbt upstream + DataHub datalake conventions |
-| datahub-infra | Infrastructure | Terragrunt, OpenTofu, Azure providers, dp-service-catalog patterns | Terraform upstream + DataHub IaC patterns |
-| datahub-k8s | Deployment | AKS, Helm, FluxCD, runway, container deployment | DataHub deployment-k8s conventions |
-| datahub-contracts | Data contracts | ODCS spec, schema validation, contract-first development | Tech lead's existing ODCS work |
+| voyager-dagster | Orchestration | Dagster API, dg CLI, assets, sensors, deploy.yaml chain, branch deployments | Dagster upstream skill + Voyager deploy conventions |
+| voyager-dlt | API ingestion | dlt API, @dlt.source/@dlt.resource, incremental loading, Dagster-dlt bridge | dlthub upstream + Voyager source patterns |
+| voyager-dbt | Transformation | dbt CLI, models, sources, testing, Raw→Prep→Prod layering | dbt upstream + Voyager datalake conventions |
+| voyager-infra | Infrastructure | Terragrunt, OpenTofu, Azure providers, dp-service-catalog patterns | Terraform upstream + Voyager IaC patterns |
+| voyager-k8s | Deployment | AKS, Helm, FluxCD, runway, container deployment | Voyager deployment-k8s conventions |
+| voyager-contracts | Data contracts | ODCS spec, schema validation, contract-first development | Tech lead's existing ODCS work |
 
 **Not a skill but part of the plugin:**
 
 | Component | Type | Contents |
 |-----------|------|----------|
-| .instructions.md | Ambient context | Slim DataHub mental model — read on every Copilot interaction |
-| datahub-platform/references/ | Reference files | Architecture, datalake layers, deployment paths, template map, PR workflows — read by domain skills via path |
+| .instructions.md | Ambient context | Slim Voyager mental model — read on every Copilot interaction |
+| voyager-platform/references/ | Reference files | Architecture, datalake layers, deployment paths, template map, PR workflows — read by domain skills via path |
 
 ---
 
@@ -754,7 +754,7 @@ This is lower priority than skill distribution because repo instructions change 
 
 ### Risk 1: Developers Don't Update
 
-**Problem:** Notifications ignored, `datahub-update` never run.
+**Problem:** Notifications ignored, `voyager-update` never run.
 **Mitigation:** Three-layer defense. Layer 1 (notification) is ignorable. Layer 2 (command) requires action. Layer 3 (staleness warning in every Copilot response) is inescapable — the developer sees it every time they use Copilot. Social pressure also helps: if one developer's Copilot keeps showing warnings while others don't, they'll update.
 
 ### Risk 2: Upstream Skill Drift
@@ -765,7 +765,7 @@ This is lower priority than skill distribution because repo instructions change 
 ### Risk 3: Skill Keyword Collisions
 
 **Problem:** Developer asks about something that matches multiple skills, Copilot picks the wrong one.
-**Mitigation:** Skill descriptions should have distinct keyword spaces with minimal overlap. If collision is unavoidable (e.g., "deploy" matches datahub-dagster, datahub-k8s, and datahub-infra), include disambiguation in the description: "Use when deploying to Dagster Cloud" vs "Use when deploying to AKS."
+**Mitigation:** Skill descriptions should have distinct keyword spaces with minimal overlap. If collision is unavoidable (e.g., "deploy" matches voyager-dagster, voyager-k8s, and voyager-infra), include disambiguation in the description: "Use when deploying to Dagster Cloud" vs "Use when deploying to AKS."
 
 ### Risk 4: ~~Multi-Domain Tasks~~ — RESOLVED
 
@@ -774,33 +774,33 @@ This is lower priority than skill distribution because repo instructions change 
 
 ### Risk 5: Curated Knowledge Goes Stale Internally
 
-**Problem:** DataHub conventions change (new repo structure, new deployment path) but skills aren't updated.
+**Problem:** Voyager conventions change (new repo structure, new deployment path) but skills aren't updated.
 **Mitigation:** Tie skill updates to the same sprint process that changes conventions. If a tech lead changes a deployment path, the corresponding skill update is part of the same work item. The drift scanner catches cases where the process discipline fails — it flags file structure changes and dependency bumps that suggest skills may need updating. MAINTENANCE.md documents which skills need updating for each type of platform change.
 
 ### Risk 6: Copilot Ignores Skill Constraints
 
 **Problem:** Copilot reads the skill but doesn't follow constraints (generates code outside the expected patterns).
-**Mitigation:** Make constraints concrete and specific — file paths, not principles. "ONLY create dlt sources inside sources/p8e-data-source-*/" is enforceable. "Follow DataHub conventions" is not. Front-load constraints at the top of SKILL.md — if Copilot only reads the first half, the guardrails should be in it. Test with example prompts and document expected vs actual behavior in tests/.
+**Mitigation:** Make constraints concrete and specific — file paths, not principles. "ONLY create dlt sources inside sources/p8e-data-source-*/" is enforceable. "Follow Voyager conventions" is not. Front-load constraints at the top of SKILL.md — if Copilot only reads the first half, the guardrails should be in it. Test with example prompts and document expected vs actual behavior in tests/.
 
 ### Risk 7: Staleness Warning Unreliable
 
-**Problem:** The staleness check instruction in each skill asks Copilot to read `datahub-version.json` and warn if stale. But Copilot may skip this preamble step and go straight to answering — same class of problem as the v3 routing table.
-**Mitigation:** Test staleness warning reliability explicitly in Phase 1. If it fires inconsistently, accept that inline warnings are best-effort and rely on the notification layer (Teams/Slack) and the `datahub-update` command as the primary freshness mechanisms. Don't design around the staleness warning being 100% reliable.
+**Problem:** The staleness check instruction in each skill asks Copilot to read `voyager-version.json` and warn if stale. But Copilot may skip this preamble step and go straight to answering — same class of problem as the v3 routing table.
+**Mitigation:** Test staleness warning reliability explicitly in Phase 1. If it fires inconsistently, accept that inline warnings are best-effort and rely on the notification layer (Teams/Slack) and the `voyager-update` command as the primary freshness mechanisms. Don't design around the staleness warning being 100% reliable.
 
-### Risk 8: .instructions.md Bleeds into Non-DataHub Work
+### Risk 8: .instructions.md Bleeds into Non-Voyager Work
 
-**Problem:** `.instructions.md` lives at the user level and is read on every Copilot interaction, including non-DataHub repos. A developer working on a React frontend gets "DataHub is a data platform with 15 repos" injected into context.
-**Mitigation:** The content is ~150 words of ambient context — small enough that it's unlikely to confuse Copilot or degrade non-DataHub interactions. If the team works exclusively on DataHub repos, this is a non-issue. If developers split time across DataHub and non-DataHub projects, monitor whether the bleed-through causes confusion and consider making the content conditional (e.g., "If the current workspace is a DataHub repo, apply the following context..."). Test this in Phase 1.
+**Problem:** `.instructions.md` lives at the user level and is read on every Copilot interaction, including non-Voyager repos. A developer working on a React frontend gets "Voyager is a data platform with 15 repos" injected into context.
+**Mitigation:** The content is ~150 words of ambient context — small enough that it's unlikely to confuse Copilot or degrade non-Voyager interactions. If the team works exclusively on Voyager repos, this is a non-issue. If developers split time across Voyager and non-Voyager projects, monitor whether the bleed-through causes confusion and consider making the content conditional (e.g., "If the current workspace is a Voyager repo, apply the following context..."). Test this in Phase 1.
 
 ### Risk 9: New Developer Onboarding
 
 **Problem:** New developer starts, doesn't have skills installed, nobody tells them.
-**Mitigation:** Add `datahub-copilot` setup to the onboarding checklist. The `datahub-update` command handles first-time clone + install in one step — no separate clone step needed.
+**Mitigation:** Add `voyager-copilot` setup to the onboarding checklist. The `voyager-update` command handles first-time clone + install in one step — no separate clone step needed.
 
 ### Risk 10: Drift Scanner Requires Cross-Repo Access
 
 **Problem:** The scanner pipeline needs read access to all 15 repos. Enterprise ADO environments often scope permissions per team.
-**Mitigation:** Create a dedicated service connection or build identity with read-only access to all DataHub repos. Document this in the central repo's README and MAINTENANCE.md. The scanner never writes to working repos — read-only access is sufficient.
+**Mitigation:** Create a dedicated service connection or build identity with read-only access to all Voyager repos. Document this in the central repo's README and MAINTENANCE.md. The scanner never writes to working repos — read-only access is sufficient.
 
 ---
 
@@ -820,7 +820,7 @@ This is lower priority than skill distribution because repo instructions change 
 
 1. Edit skill files in the central repo
 2. Update `version.json` (bump version, update timestamp and changelog)
-3. Merge to main — notification goes out, developers run `datahub-update`
+3. Merge to main — notification goes out, developers run `voyager-update`
 
 ### Responding to a Drift Report
 
@@ -835,7 +835,7 @@ This is lower priority than skill distribution because repo instructions change 
 - [ ] Check upstream sources for major version changes (Dagster, dbt, dlt, Databricks, Terraform)
 - [ ] Review accumulated drift reports for patterns (same thing flagged repeatedly = systemic gap)
 - [ ] Review test results — run example prompts against current skills
-- [ ] Check if any DataHub platform conventions have changed
+- [ ] Check if any Voyager platform conventions have changed
 - [ ] Update UPSTREAM-SOURCE.md for any re-curated skills
 - [ ] Bump version.json and merge
 
@@ -847,22 +847,22 @@ This is lower priority than skill distribution because repo instructions change 
 
 - [ ] Create central repo with directory structure
 - [ ] Build setup.ps1 with PowerShell profile integration
-- [ ] Write .instructions.md (slim DataHub mental model)
+- [ ] Write .instructions.md (slim Voyager mental model)
 - [ ] Create version.json and staleness check pattern
-- [ ] Build datahub-platform reference files (architecture, datalake layers, deployment paths)
-- [ ] Build datahub-dlt skill (curate from upstream + DataHub conventions)
-- [ ] Write copilot-instructions.md for datahub-data-platform-repo
-- [ ] Test full chain: install → use skill → get DataHub-specific answer
-- [ ] Verify .instructions.md is read on every interaction (test with generic DataHub question)
+- [ ] Build voyager-platform reference files (architecture, datalake layers, deployment paths)
+- [ ] Build voyager-dlt skill (curate from upstream + Voyager conventions)
+- [ ] Write copilot-instructions.md for voyager-data-platform-repo
+- [ ] Test full chain: install → use skill → get Voyager-specific answer
+- [ ] Verify .instructions.md is read on every interaction (test with generic Voyager question)
 - [ ] Verify skill reads platform reference files by path
 - [ ] Test staleness warning fires after 14 days (and note reliability — see Risk 7)
-- [ ] Test .instructions.md bleed-through: open a non-DataHub repo and verify DataHub context doesn't confuse Copilot (see Risk 8)
+- [ ] Test .instructions.md bleed-through: open a non-Voyager repo and verify Voyager context doesn't confuse Copilot (see Risk 8)
 - [ ] Deploy to 2-3 developers on real sprint tasks
 
 ### Phase 2: Dagster + dbt + Distribution (Week 3-4)
 
-- [ ] Build datahub-dagster skill (curate from tech lead's upstream skill)
-- [ ] Build datahub-dbt skill (curate from upstream)
+- [ ] Build voyager-dagster skill (curate from tech lead's upstream skill)
+- [ ] Build voyager-dbt skill (curate from upstream)
 - [ ] Write copilot-instructions.md for data-transformation
 - [ ] Set up ADO pipeline for team notifications on merge to main
 - [ ] Build scan-config.json for initial repos
@@ -871,14 +871,14 @@ This is lower priority than skill distribution because repo instructions change 
 
 ### Phase 3: Infra + K8s (Week 5-6)
 
-- [ ] Build datahub-k8s and datahub-infra skills
+- [ ] Build voyager-k8s and voyager-infra skills
 - [ ] Write copilot-instructions.md for remaining repos
 - [ ] Expand scan-config.json to cover all repos
 - [ ] Set up ADO pipeline for repo instruction distribution (Phase 2 automation)
 
 ### Phase 4: Full Coverage (Week 7-8)
 
-- [ ] Adopt datahub-contracts skill from tech lead's ODCS work
+- [ ] Adopt voyager-contracts skill from tech lead's ODCS work
 - [ ] Complete copilot-instructions.md for all 15 repos
 - [ ] Write MAINTENANCE.md
 - [ ] Run full test suite across all skills
@@ -890,14 +890,14 @@ This is lower priority than skill distribution because repo instructions change 
 ## 15. Coordination with Tech Lead's Existing Work
 
 The tech lead has already built:
-- Dagster upstream skill (curate into datahub-dagster)
-- ODCS agent (adapt substance into datahub-contracts skill)
+- Dagster upstream skill (curate into voyager-dagster)
+- ODCS agent (adapt substance into voyager-contracts skill)
 - Various custom skills with nested reference files
 
 **Approach:** Frame the central repo as scaling her work across all 15 repos. Specifically:
-- Her Dagster upstream skill → curate into datahub-dagster, filtering through DataHub conventions
-- Her ODCS agent → extract the knowledge and constraints into datahub-contracts skill format
-- Her custom DataHub-specific content → evaluate for datahub-platform references
+- Her Dagster upstream skill → curate into voyager-dagster, filtering through Voyager conventions
+- Her ODCS agent → extract the knowledge and constraints into voyager-contracts skill format
+- Her custom Voyager-specific content → evaluate for voyager-platform references
 - Coordinate before Phase 1 to align on structure and avoid duplicate effort
 
 ---
@@ -906,10 +906,10 @@ The tech lead has already built:
 
 | v3 Component | Status | Reason |
 |--------------|--------|--------|
-| .instructions.md as routing table | **Repurposed** as ambient context | Copilot doesn't reliably read it before matching skills. Now carries a slim DataHub mental model instead of routing rules — provides baseline context on every interaction without trying to control dispatch. |
+| .instructions.md as routing table | **Repurposed** as ambient context | Copilot doesn't reliably read it before matching skills. Now carries a slim Voyager mental model instead of routing rules — provides baseline context on every interaction without trying to control dispatch. |
 | Specialist agents (.agent.md) | Dropped | Copilot skips agents when skills match keywords directly. Agent value (constraints, approach, output format) now lives inside skills. |
 | runSubagent delegation | Dropped | Unnecessary when there's no agent to delegate to. |
 | Orchestrator agent for multi-skill tasks | Dropped | Testing confirmed Copilot reads multiple skills natively in a single interaction. No orchestration layer needed. |
 | Separate upstream skill directories | Dropped | Raw upstream skills compete with curated skills for Copilot's attention. Upstream knowledge is now curated into domain skills directly. |
 | user-level prompts/ directory for agents | **Repurposed** for .instructions.md | No longer holds agent files. Holds only the slim .instructions.md platform context file. |
-| datahub-platform as a skill | **Demoted** to reference directory | A platform skill with keywords like "architecture" and "deployment" would attract false matches. Now a plain reference directory with no SKILL.md — only read when domain skills explicitly point to it. |
+| voyager-platform as a skill | **Demoted** to reference directory | A platform skill with keywords like "architecture" and "deployment" would attract false matches. Now a plain reference directory with no SKILL.md — only read when domain skills explicitly point to it. |

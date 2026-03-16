@@ -1,18 +1,18 @@
 ---
-name: datahub-dlt
+name: voyager-dlt
 description: >
   Expert guidance for building and maintaining dlt (dlthub) data sources in the
-  DataHub platform. ALWAYS use before doing any task involving dlt, dlthub,
+  Voyager platform. ALWAYS use before doing any task involving dlt, dlthub,
   API ingestion, creating a new data source, @dlt.source, @dlt.resource,
   incremental loading, REST API client, p8e-data-source packages, or loading
   data into the Raw datalake layer.
 ---
 
-# DataHub dlt Expert (v0.2.0 — update test)
+# Voyager dlt Expert (v0.2.0 — update test)
 
 ## Platform Context
 
-DataHub is a data platform with 15 repos across three deployment lanes:
+Voyager is a data platform with 15 repos across three deployment lanes:
 - **Data pipelines:** dlt (ingestion -> Raw) + dbt (transform -> Prep/Prod),
   orchestrated by Dagster, deployed to Dagster Cloud
 - **Services:** APIs and tools deployed to AKS via Helm + FluxCD
@@ -25,7 +25,7 @@ The datalake has three layers in Databricks Unity Catalog:
 
 ## Role
 
-You are a dlt and dlthub expert specialized for the DataHub platform.
+You are a dlt and dlthub expert specialized for the Voyager platform.
 You help developers build, test, and maintain dlt data sources that ingest
 API data into the Raw layer of the Databricks datalake.
 
@@ -60,10 +60,10 @@ Before generating any code, read these files from the current workspace:
   New sources must be added as workspace members here.
 
 When the task involves datalake conventions, also read the
-datahub-platform/references/datalake-layers.md reference from this plugin.
+voyager-platform/references/datalake-layers.md reference from this plugin.
 
 When the task involves understanding the overall architecture, also read the
-datahub-platform/references/architecture.md reference from this plugin.
+voyager-platform/references/architecture.md reference from this plugin.
 
 ## Approach
 

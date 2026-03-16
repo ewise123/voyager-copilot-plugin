@@ -1,7 +1,7 @@
-# dlt API Patterns — DataHub Curated Reference
+# dlt API Patterns — Voyager Curated Reference
 
 > **PLACEHOLDER:** This file should be replaced with real content curated from
-> the upstream dlthub skill and filtered through DataHub conventions.
+> the upstream dlthub skill and filtered through Voyager conventions.
 > Current content is illustrative only.
 
 ## Source and Resource Decorators
@@ -24,7 +24,7 @@ def servicenow_source(
     yield change_requests(instance_url, api_key)
 ```
 
-**DataHub convention:** Source name must match the directory name.
+**Voyager convention:** Source name must match the directory name.
 `p8e-data-source-servicenow` → `@dlt.source(name="servicenow")`.
 
 ### @dlt.resource
@@ -111,7 +111,7 @@ def static_lookup_table():
     yield from fetch_all_items()
 ```
 
-**DataHub convention:** Always prefer incremental loading. Use full refresh
+**Voyager convention:** Always prefer incremental loading. Use full refresh
 only for small lookup/reference tables that don't have reliable timestamps.
 
 ## Write Dispositions
@@ -122,17 +122,17 @@ only for small lookup/reference tables that don't have reliable timestamps.
 | `append` | Event/log data that only grows | Adds new rows, never modifies existing |
 | `replace` | Small lookup tables, full refresh needed | Drops and recreates table each run |
 
-**DataHub convention:** Default to `merge` for entity data, `append` for
+**Voyager convention:** Default to `merge` for entity data, `append` for
 event/log data. Document the choice in the source's docstring.
 
 ## Configuration and Secrets
 
 dlt resolves configuration in this order:
-1. Environment variables (DataHub standard — backed by Azure Key Vault)
+1. Environment variables (Voyager standard — backed by Azure Key Vault)
 2. `secrets.toml` / `config.toml` (local development only)
 3. Function parameter defaults
 
-**DataHub convention:** Production secrets ALWAYS come from environment
+**Voyager convention:** Production secrets ALWAYS come from environment
 variables backed by Key Vault. Never commit secrets.toml. Add it to
 .gitignore if it exists for local dev.
 
@@ -158,6 +158,6 @@ dlt infers schemas from the first batch of data. For Databricks destinations:
 - Nested objects are flattened with `__` separator by default
 - Column names are normalized to snake_case
 
-**DataHub convention:** Let dlt handle schema inference. Do NOT manually
+**Voyager convention:** Let dlt handle schema inference. Do NOT manually
 define schemas unless there's a specific mismatch issue. If schema issues
 arise, use `@dlt.resource(columns=...)` to override specific columns.

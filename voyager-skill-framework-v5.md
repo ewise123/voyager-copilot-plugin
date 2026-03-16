@@ -1,17 +1,17 @@
-# DataHub Copilot Plugin
+# Voyager Copilot Plugin
 ## Architecture, Distribution, and Maintenance (v5 — Agent Plugin)
 
 ---
 
 ## 1. What Changed from v4
 
-v4 established the right content architecture — curated skills, platform references, and a slim `.instructions.md` mental model. But it relied on a custom distribution layer: a PowerShell setup script, a `datahub-update` command registered in the developer's shell profile, and a manual git pull workflow. This worked but required ongoing maintenance of infrastructure that wasn't core to the problem.
+v4 established the right content architecture — curated skills, platform references, and a slim `.instructions.md` mental model. But it relied on a custom distribution layer: a PowerShell setup script, a `voyager-update` command registered in the developer's shell profile, and a manual git pull workflow. This worked but required ongoing maintenance of infrastructure that wasn't core to the problem.
 
-v5 replaces the custom distribution layer with **VS Code Agent Plugins** — a native preview feature that lets you package skills, agents, hooks, and MCP servers as installable bundles, distributed via a Git-based marketplace. The central repo becomes both the plugin source and the marketplace. Developers install and update through VS Code's Extensions sidebar. No custom scripts, no shell profile modifications, no `datahub-update` command.
+v5 replaces the custom distribution layer with **VS Code Agent Plugins** — a native preview feature that lets you package skills, agents, hooks, and MCP servers as installable bundles, distributed via a Git-based marketplace. The central repo becomes both the plugin source and the marketplace. Developers install and update through VS Code's Extensions sidebar. No custom scripts, no shell profile modifications, no `voyager-update` command.
 
 The content architecture (skills, platform references, per-repo instructions) is unchanged from v4. Only the distribution mechanism changes.
 
-**Important:** Agent Plugins are currently a VS Code preview feature. The v4 setup script (`setup.ps1` + `datahub-update`) should be maintained as a fallback until the plugin feature reaches stable release. Both distribution mechanisms can coexist — the plugin installs to the same skill locations.
+**Important:** Agent Plugins are currently a VS Code preview feature. The v4 setup script (`setup.ps1` + `voyager-update`) should be maintained as a fallback until the plugin feature reaches stable release. Both distribution mechanisms can coexist — the plugin installs to the same skill locations.
 
 ---
 
@@ -22,28 +22,28 @@ The content architecture (skills, platform references, per-repo instructions) is
 | Skills auto-discovered from `~/.copilot/skills/` with nested reference subdirectories | Created test skill with nested references containing a unique phrase not in any training data | ✅ Copilot returned the planted phrase — skill discovery with nested refs works |
 | User-level agents roam across workspaces | Agent in `prompts/` tested across different ADO-hosted workspaces | ✅ Works regardless of which workspace is open |
 | Copilot reads skills based on keyword matching without routing | Installed dagster-expert skill, told Copilot "I need to do dagster work" with no routing table in place | ✅ Copilot matched keywords directly to skill and read it — confirms skills-only architecture works |
-| Copilot reads multiple skills in a single interaction | Installed datahub-dlt and dagster-expert skills, prompted: "Create a new dlt source for ServiceNow and wire it up as a Dagster asset on a daily schedule" | ✅ Copilot identified both domains, read both skill files, and combined knowledge from both. No agent or orchestration layer needed. |
-| Copilot respects skill constraints in unfamiliar workspace | Same multi-skill test run in a non-DataHub repo | ✅ Copilot attempted to find expected workspace files (sources/p8e-data-source-*/, pyproject.toml) and correctly identified they were missing — constraints are being followed |
-| VS Code Agent Plugin feature supports skill bundling | Created plugin with datahub-dlt skill, installed via GitHub marketplace | ✅ Skill appears in `/skills` list with "Plugins" flag. Copilot reads SKILL.md and references/ when invoked. |
-| Plugin-installed skills auto-match on keywords | Prompted "create a new dlt source for the ServiceNow API using the p8e-data-source pattern" without `/datahub-dlt` prefix | ✅ Copilot matched keywords from frontmatter description and auto-invoked the skill. Requires domain-specific keywords — generic prompts like "create a data source" may not trigger. |
+| Copilot reads multiple skills in a single interaction | Installed voyager-dlt and dagster-expert skills, prompted: "Create a new dlt source for ServiceNow and wire it up as a Dagster asset on a daily schedule" | ✅ Copilot identified both domains, read both skill files, and combined knowledge from both. No agent or orchestration layer needed. |
+| Copilot respects skill constraints in unfamiliar workspace | Same multi-skill test run in a non-Voyager repo | ✅ Copilot attempted to find expected workspace files (sources/p8e-data-source-*/, pyproject.toml) and correctly identified they were missing — constraints are being followed |
+| VS Code Agent Plugin feature supports skill bundling | Created plugin with voyager-dlt skill, installed via GitHub marketplace | ✅ Skill appears in `/skills` list with "Plugins" flag. Copilot reads SKILL.md and references/ when invoked. |
+| Plugin-installed skills auto-match on keywords | Prompted "create a new dlt source for the ServiceNow API using the p8e-data-source pattern" without `/voyager-dlt` prefix | ✅ Copilot matched keywords from frontmatter description and auto-invoked the skill. Requires domain-specific keywords — generic prompts like "create a data source" may not trigger. |
 | ADO in VS Code `chat.plugins.marketplaces` | Tested multiple ADO URL formats including PAT-embedded URLs | ❌ VS Code silently ignores ADO URLs. Only GitHub URL patterns are recognized. |
 | ADO in Copilot CLI `plugin marketplace add` | `copilot plugin marketplace add <ADO URL>` | ✅ Works — but CLI plugins don't sync to VS Code. Separate plugin systems. |
 | `file:///` local clone as marketplace source | Cloned ADO repo locally, used `file:///C:/Users/.../repo` | ✅ Works in VS Code. Requires manual `git pull` for updates. |
-| Duplicate skills from multiple directories | Had skills in both `skills/` (root) and `plugins/datahub/skills/` | ❌ VS Code discovers both — skill appeared twice. Removed root copy. |
+| Duplicate skills from multiple directories | Had skills in both `skills/` (root) and `plugins/voyager/skills/` | ❌ VS Code discovers both — skill appeared twice. Removed root copy. |
 | Plugin update auto-detected by VS Code | Pushed version bump to GitHub, checked for update notification | ⚠️ No auto-update observed. Manual `git pull` + reload needed. May be caused by manual clone workaround — needs further investigation. |
-| Plugin bundles custom instructions (.instructions.md) | Placed .instructions.md in plugin root with DataHub mental model | ❌ Not picked up. Plugin format supports skills, agents, hooks, mcp, commands — but NOT .instructions.md. Copilot ignores it. |
-| Skill paths can traverse outside plugin directory | Used `../../skills/datahub-dlt` in plugin.json to reference shared skills/ directory | ❌ Skill did not appear in `/skills`. Changed to `./skills/datahub-dlt` with skills inside the plugin directory — works. |
+| Plugin bundles custom instructions (.instructions.md) | Placed .instructions.md in plugin root with Voyager mental model | ❌ Not picked up. Plugin format supports skills, agents, hooks, mcp, commands — but NOT .instructions.md. Copilot ignores it. |
+| Skill paths can traverse outside plugin directory | Used `../../skills/voyager-dlt` in plugin.json to reference shared skills/ directory | ❌ Skill did not appear in `/skills`. Changed to `./skills/voyager-dlt` with skills inside the plugin directory — works. |
 | VS Code clone-on-install works reliably | Clicked Install from @agentPlugins in Extensions sidebar | ⚠️ Unreliable. VS Code pre-creates parent directories, then `git clone` fails with "destination path already exists." Workaround: manually clone to the expected path, then reload. See setup journal. |
 
 The multi-skill test is the most important validation. It confirms that Copilot natively handles cross-domain tasks without agents, routing tables, or orchestration — the simplest possible architecture works.
 
 **Decisions from Phase 0 testing:**
 
-1. **Ambient context delivery: preamble fallback.** Since .instructions.md is not supported by the plugin format, the ~150 word DataHub mental model is baked into each skill's SKILL.md as a "Platform Context" section. This means ambient context is only available when a skill is matched — not on every interaction. This is acceptable because: (a) the context only matters during DataHub work, (b) DataHub work triggers a skill, (c) general questions without skill context are not the target use case.
+1. **Ambient context delivery: preamble fallback.** Since .instructions.md is not supported by the plugin format, the ~150 word Voyager mental model is baked into each skill's SKILL.md as a "Platform Context" section. This means ambient context is only available when a skill is matched — not on every interaction. This is acceptable because: (a) the context only matters during Voyager work, (b) Voyager work triggers a skill, (c) general questions without skill context are not the target use case.
 
 2. **Marketplace hosting: GitHub.** VS Code's `chat.plugins.marketplaces` only recognizes GitHub URLs. ADO URLs are silently ignored. ADO works via Copilot CLI but that's a separate plugin system. GitHub shorthand (`owner/repo`) is the primary distribution. ADO is kept as a secondary remote.
 
-3. **Skill location: single copy inside plugin directory.** Skills must live inside the plugin directory (e.g., `plugins/datahub/skills/`) with relative paths like `./skills/datahub-dlt`. Paths that traverse outside the plugin root (`../../skills/`) do not resolve. Do NOT keep a second copy at the repo root — VS Code discovers both and shows duplicate skills.
+3. **Skill location: single copy inside plugin directory.** Skills must live inside the plugin directory (e.g., `plugins/voyager/skills/`) with relative paths like `./skills/voyager-dlt`. Paths that traverse outside the plugin root (`../../skills/`) do not resolve. Do NOT keep a second copy at the repo root — VS Code discovers both and shows duplicate skills.
 
 4. **Updates: no auto-update exists.** Agent plugins have no auto-update mechanism — this is a preview feature limitation, not a bug in our setup. No `chat.plugins.autoUpdate` setting exists, no "Update" button in the Extensions sidebar, and no documented polling. Update workflow: tech lead pushes to GitHub, notifies team, devs run `git pull` in their agentPlugins directory and reload VS Code. Tim Heuer's [Agent Plugins Browser](https://github.com/timheuer/vscode-agent-plugins) extension adds a "Refresh" command that may help.
 
@@ -51,9 +51,9 @@ The multi-skill test is the most important validation. It confirms that Copilot 
 
 ## 3. The Problem This Solves
 
-Developers working in the DataHub platform need to understand how 15 repositories, three deployment paths, and a dozen tools connect together. Today, that knowledge lives in people's heads, scattered docs, and tribal knowledge. When a developer needs to add a new dlt source, fix a Dagster deploy, or create an infrastructure stack, they spend time figuring out which repos to touch, which templates to follow, and which patterns to use.
+Developers working in the Voyager platform need to understand how 15 repositories, three deployment paths, and a dozen tools connect together. Today, that knowledge lives in people's heads, scattered docs, and tribal knowledge. When a developer needs to add a new dlt source, fix a Dagster deploy, or create an infrastructure stack, they spend time figuring out which repos to touch, which templates to follow, and which patterns to use.
 
-This plugin puts that knowledge directly into the developer's IDE, scoped to exactly what they're working on. Install the plugin, and Copilot becomes a DataHub expert.
+This plugin puts that knowledge directly into the developer's IDE, scoped to exactly what they're working on. Install the plugin, and Copilot becomes a Voyager expert.
 
 ---
 
@@ -68,15 +68,15 @@ This plugin puts that knowledge directly into the developer's IDE, scoped to exa
 │  Everything user-level is bundled in the plugin:                        │
 │                                                                         │
 │  Skills                                                                 │
-│    datahub-dagster/  — Dagster + DataHub orchestration patterns          │
-│    datahub-dlt/      — dlt + DataHub ingestion patterns                 │
-│    datahub-dbt/      — dbt + DataHub transformation patterns            │
-│    datahub-infra/    — Terragrunt/OpenTofu + DataHub IaC                │
-│    datahub-k8s/      — K8s/AKS + DataHub deployment                    │
-│    datahub-contracts/ — ODCS data contracts                             │
+│    voyager-dagster/  — Dagster + Voyager orchestration patterns          │
+│    voyager-dlt/      — dlt + Voyager ingestion patterns                 │
+│    voyager-dbt/      — dbt + Voyager transformation patterns            │
+│    voyager-infra/    — Terragrunt/OpenTofu + Voyager IaC                │
+│    voyager-k8s/      — K8s/AKS + Voyager deployment                    │
+│    voyager-contracts/ — ODCS data contracts                             │
 │                                                                         │
 │  Platform References (NOT a skill — no SKILL.md)                        │
-│    datahub-platform/references/                                         │
+│    voyager-platform/references/                                         │
 │      architecture.md, datalake-layers.md, deployment-*.md,              │
 │      template-map.md, pr-workflow.md                                    │
 │                                                                         │
@@ -98,12 +98,12 @@ This plugin puts that knowledge directly into the developer's IDE, scoped to exa
 ### Three Layers of Context
 
 **Layer 1: Ambient context (every skill invocation)**
-A slim (~150 word) DataHub mental model. Gives Copilot baseline DataHub awareness: deployment lanes, datalake layers, vocabulary. Baked into each skill's SKILL.md as a "Platform Context" preamble section. Phase 0 testing confirmed that `.instructions.md` is not supported by the plugin format, so the preamble approach is the permanent solution, not a fallback.
+A slim (~150 word) Voyager mental model. Gives Copilot baseline Voyager awareness: deployment lanes, datalake layers, vocabulary. Baked into each skill's SKILL.md as a "Platform Context" preamble section. Phase 0 testing confirmed that `.instructions.md` is not supported by the plugin format, so the preamble approach is the permanent solution, not a fallback.
 
 ```markdown
-# DataHub Platform Context
+# Voyager Platform Context
 
-DataHub is a data platform with 15 repos across three deployment lanes:
+Voyager is a data platform with 15 repos across three deployment lanes:
 - **Data pipelines:** dlt (ingestion → Raw) + dbt (transform → Prep/Prod),
   orchestrated by Dagster, deployed to Dagster Cloud
 - **Services:** APIs and tools deployed to AKS via Helm + FluxCD
@@ -118,20 +118,20 @@ The datalake has three layers in Databricks Unity Catalog:
 Note: the ambient context intentionally does NOT point to the platform reference directory. Including a path would invite Copilot to proactively read those files on every interaction. Only domain skills contain reference paths.
 
 **Layer 2: Domain skills (matched by task keywords)**
-Curated skills that Copilot discovers and reads when keywords match. Each skill contains upstream tool knowledge filtered through DataHub conventions, constraints, approach patterns, and output guidance.
+Curated skills that Copilot discovers and reads when keywords match. Each skill contains upstream tool knowledge filtered through Voyager conventions, constraints, approach patterns, and output guidance.
 
 **Layer 3: Per-repo instructions (workspace-scoped)**
 Light, stable facts about the specific repo the developer has open. File structure, coding standards, linked repos, what not to do.
 
 ### How It Works
 
-1. Developer installs the DataHub plugin from VS Code's Extensions sidebar (one-time)
-2. Developer opens any DataHub repo in VS Code
-3. Copilot reads ambient context — gets the DataHub mental model
+1. Developer installs the Voyager plugin from VS Code's Extensions sidebar (one-time)
+2. Developer opens any Voyager repo in VS Code
+3. Copilot reads ambient context — gets the Voyager mental model
 4. Copilot reads `.github/copilot-instructions.md` (workspace-level) — gets repo-specific context
 5. Developer describes a task in Copilot Chat
 6. Copilot matches task keywords to a domain skill and reads it
-7. The skill provides: domain knowledge, DataHub-specific constraints, workspace files to examine, approach, and output guidance
+7. The skill provides: domain knowledge, Voyager-specific constraints, workspace files to examine, approach, and output guidance
 8. The skill may direct Copilot to read specific platform reference files for cross-cutting context
 9. Developer reviews the result
 
@@ -140,8 +140,8 @@ Light, stable facts about the specific repo the developer has open. File structu
 Developer types: "I need to add a new dlt source for ServiceNow with incidents and change requests"
 
 Copilot automatically:
-- Matches "dlt source" → reads `datahub-dlt` skill
-- Gets upstream dlt knowledge (API patterns, @dlt.source conventions) already filtered for DataHub
+- Matches "dlt source" → reads `voyager-dlt` skill
+- Gets upstream dlt knowledge (API patterns, @dlt.source conventions) already filtered for Voyager
 - Gets platform context (Raw layer conventions, repo structure)
 - Reads existing sources in workspace (p8e-data-source-* patterns)
 - Returns scaffolded source package with all files, tests, and next steps
@@ -158,7 +158,7 @@ Key points carried forward:
 - SKILL.md under 300 lines, reference files under 500 lines
 - Front-load constraints at the top of SKILL.md
 - Domain skills point to platform references by path, only when relevant
-- datahub-platform has no SKILL.md — it's a reference directory only
+- voyager-platform has no SKILL.md — it's a reference directory only
 
 ---
 
@@ -184,51 +184,51 @@ The central repo serves dual roles: it's the **plugin source** (contains the ski
 ### Structure
 
 ```
-datahub-copilot/                          (GitHub repo — marketplace source)
+voyager-copilot/                          (GitHub repo — marketplace source)
 │
 ├── .github/
 │   └── plugin/
 │       └── marketplace.json              # Marketplace registry
 │
 ├── plugins/
-│   └── datahub/
+│   └── voyager/
 │       ├── .github/
 │       │   └── plugin.json               # Plugin manifest (also at plugin root)
 │       ├── plugin.json                   # Plugin manifest (VS Code reads this)
 │       └── skills/                       # Skills MUST live inside plugin directory
-│           ├── datahub-dagster/
+│           ├── voyager-dagster/
 │           │   ├── SKILL.md              # Includes Platform Context preamble
 │           │   ├── UPSTREAM-SOURCE.md
 │           │   ├── skill-metadata.json
 │           │   └── references/
 │           │
-│           ├── datahub-dlt/
+│           ├── voyager-dlt/
 │           │   ├── SKILL.md              # Includes Platform Context preamble
 │           │   ├── UPSTREAM-SOURCE.md
 │           │   ├── skill-metadata.json
 │           │   └── references/
 │           │
-│           ├── datahub-dbt/
+│           ├── voyager-dbt/
 │           │   ├── SKILL.md
 │           │   ├── UPSTREAM-SOURCE.md
 │           │   ├── skill-metadata.json
 │           │   └── references/
 │           │
-│           ├── datahub-infra/
+│           ├── voyager-infra/
 │           │   ├── SKILL.md
 │           │   ├── UPSTREAM-SOURCE.md
 │           │   ├── skill-metadata.json
 │           │   └── references/
 │           │
-│           ├── datahub-k8s/
+│           ├── voyager-k8s/
 │           │   ├── SKILL.md
 │           │   └── references/
 │           │
-│           ├── datahub-contracts/
+│           ├── voyager-contracts/
 │           │   ├── SKILL.md
 │           │   └── references/
 │           │
-│           └── datahub-platform/         # NOT a skill — no SKILL.md
+│           └── voyager-platform/         # NOT a skill — no SKILL.md
 │               └── references/
 │                   ├── architecture.md
 │                   ├── datalake-layers.md
@@ -241,7 +241,7 @@ datahub-copilot/                          (GitHub repo — marketplace source)
 │
 ├── repo-instructions/                    # Source for per-repo copilot-instructions.md
 │   ├── data-api.md
-│   ├── datahub-data-platform-repo.md
+│   ├── voyager-data-platform-repo.md
 │   ├── data-transformation.md
 │   └── ... (one per repo)
 │
@@ -259,50 +259,50 @@ datahub-copilot/                          (GitHub repo — marketplace source)
     └── infra-new-stack.md
 ```
 
-**Important:** Skills must live inside the plugin directory (`plugins/datahub/skills/`). Phase 0 testing confirmed that relative paths traversing outside the plugin root (e.g., `../../skills/`) do not resolve. The root `skills/` directory serves as the authoring/editing location. A build step or manual copy syncs changes into the plugin directory before committing.
+**Important:** Skills must live inside the plugin directory (`plugins/voyager/skills/`). Phase 0 testing confirmed that relative paths traversing outside the plugin root (e.g., `../../skills/`) do not resolve. The root `skills/` directory serves as the authoring/editing location. A build step or manual copy syncs changes into the plugin directory before committing.
 
 ### Plugin Manifest (plugin.json)
 
 ```json
 {
-  "name": "datahub",
-  "description": "DataHub platform expertise for Copilot - curated skills for dlt, Dagster, dbt, Terraform, K8s, and ODCS data contracts",
+  "name": "voyager",
+  "description": "Voyager platform expertise for Copilot - curated skills for dlt, Dagster, dbt, Terraform, K8s, and ODCS data contracts",
   "version": "1.0.0",
   "author": {
-    "name": "DataHub Platform Team"
+    "name": "Voyager Platform Team"
   },
   "skills": [
-    "./skills/datahub-dagster",
-    "./skills/datahub-dlt",
-    "./skills/datahub-dbt",
-    "./skills/datahub-infra",
-    "./skills/datahub-k8s",
-    "./skills/datahub-contracts",
-    "./skills/datahub-platform"
+    "./skills/voyager-dagster",
+    "./skills/voyager-dlt",
+    "./skills/voyager-dbt",
+    "./skills/voyager-infra",
+    "./skills/voyager-k8s",
+    "./skills/voyager-contracts",
+    "./skills/voyager-platform"
   ]
 }
 ```
 
-Note: `plugin.json` lives at the plugin root (`plugins/datahub/plugin.json`). A copy also exists at `plugins/datahub/.github/plugin.json` for compatibility. Skill paths are resolved relative to the plugin root. **Paths must not traverse outside the plugin directory** — `../../skills/` does not work. Use `./skills/` with skills copied inside the plugin directory.
+Note: `plugin.json` lives at the plugin root (`plugins/voyager/plugin.json`). A copy also exists at `plugins/voyager/.github/plugin.json` for compatibility. Skill paths are resolved relative to the plugin root. **Paths must not traverse outside the plugin directory** — `../../skills/` does not work. Use `./skills/` with skills copied inside the plugin directory.
 
 ### Marketplace Manifest (marketplace.json)
 
 ```json
 {
-  "name": "datahub-copilot-marketplace",
+  "name": "voyager-copilot-marketplace",
   "owner": {
-    "name": "DataHub Platform Team"
+    "name": "Voyager Platform Team"
   },
   "metadata": {
-    "description": "DataHub Copilot plugin marketplace",
+    "description": "Voyager Copilot plugin marketplace",
     "version": "1.0.0"
   },
   "plugins": [
     {
-      "name": "datahub",
-      "description": "DataHub platform expertise — curated skills for dlt, Dagster, dbt, infrastructure, K8s, and data contracts",
+      "name": "voyager",
+      "description": "Voyager platform expertise — curated skills for dlt, Dagster, dbt, infrastructure, K8s, and data contracts",
       "version": "1.0.0",
-      "source": "./plugins/datahub"
+      "source": "./plugins/voyager"
     }
   ]
 }
@@ -316,11 +316,11 @@ Developer adds the marketplace to their VS Code user settings (**must be user-le
 // settings.json (Ctrl+Shift+P → "Preferences: Open User Settings (JSON)")
 "chat.plugins.enabled": true,
 "chat.plugins.marketplaces": [
-    "ewise123/datahub-copilot-plugin"
+    "ewise123/voyager-copilot-plugin"
 ]
 ```
 
-Then installs the plugin from the Extensions sidebar: search `@agentPlugins`, find "datahub", click Install.
+Then installs the plugin from the Extensions sidebar: search `@agentPlugins`, find "voyager", click Install.
 
 **Known issue:** The Install button may fail with a git clone error ("destination path already exists"). This is a VS Code bug where it pre-creates parent directories before cloning. Workaround: manually clone the repo to the expected path and reload VS Code. See `PHASE-0-SETUP-JOURNAL.md` for detailed steps.
 
@@ -341,8 +341,8 @@ All user-level content — skills, platform references, and ambient context — 
 2. Plugin version is bumped in `plugin.json` and `marketplace.json`
 3. Tech lead notifies team (Teams/Slack) that an update is available
 4. Developer updates their local plugin:
-   - **Windows:** `git -C "%APPDATA%\Code\agentPlugins\github.com\ewise123\datahub-copilot-plugin" pull`
-   - **WSL:** `git -C /mnt/c/Users/{user}/AppData/Roaming/Code/agentPlugins/github.com/ewise123/datahub-copilot-plugin pull`
+   - **Windows:** `git -C "%APPDATA%\Code\agentPlugins\github.com\ewise123\voyager-copilot-plugin" pull`
+   - **WSL:** `git -C /mnt/c/Users/{user}/AppData/Roaming/Code/agentPlugins/github.com/ewise123/voyager-copilot-plugin pull`
 5. Developer reloads VS Code (Ctrl+Shift+P → "Developer: Reload Window")
 
 **Note:** Agent plugins have no auto-update mechanism (preview limitation). There is no "Update" button, no polling, and no `chat.plugins.autoUpdate` setting. This may improve as the feature matures. Tim Heuer's [Agent Plugins Browser](https://github.com/timheuer/vscode-agent-plugins) extension adds a "Refresh" command that may simplify this.
@@ -366,7 +366,7 @@ Per-repo `copilot-instructions.md` files are distributed separately through ADO 
 
 ### Fallback Distribution (v4 Script)
 
-The v4 `setup.ps1` and `datahub-update` command are maintained in the central repo as a fallback for:
+The v4 `setup.ps1` and `voyager-update` command are maintained in the central repo as a fallback for:
 - Environments where the plugin preview feature is disabled or unavailable
 - New machines where VS Code isn't yet configured with the marketplace
 - Troubleshooting plugin installation issues
@@ -378,7 +378,7 @@ Both mechanisms install to the same locations — they can coexist without confl
 ```
 User-level content (skills, platform refs, ambient context):
     Primary:  VS Code Agent Plugin marketplace
-    Fallback: datahub-update (v4 setup script)
+    Fallback: voyager-update (v4 setup script)
 
 Repo-level content (copilot-instructions.md):
     Primary:  ADO pipeline PRs to working repos
@@ -391,7 +391,7 @@ Repo-level content (copilot-instructions.md):
 
 Unchanged from v4. The drift scanner is a scheduled ADO pipeline that scans all 15 working repos for dependency version changes, key file modifications, structure drift, and new/removed repos. It produces a weekly drift report posted to the team channel.
 
-The only change: the "Drift → Update Flow" now ends with the plugin distribution channel instead of `datahub-update`:
+The only change: the "Drift → Update Flow" now ends with the plugin distribution channel instead of `voyager-update`:
 
 ```
 Weekly scan runs
@@ -431,19 +431,19 @@ This is separate from the plugin because per-repo instructions are version-contr
 
 | Skill | Domain | Key Knowledge | Curated From |
 |-------|--------|---------------|--------------|
-| datahub-dagster | Orchestration | Dagster API, dg CLI, assets, sensors, deploy.yaml chain, branch deployments | Dagster upstream skill + DataHub deploy conventions |
-| datahub-dlt | API ingestion | dlt API, @dlt.source/@dlt.resource, incremental loading, Dagster-dlt bridge | dlthub upstream + DataHub source patterns |
-| datahub-dbt | Transformation | dbt CLI, models, sources, testing, Raw→Prep→Prod layering | dbt upstream + DataHub datalake conventions |
-| datahub-infra | Infrastructure | Terragrunt, OpenTofu, Azure providers, dp-service-catalog patterns | Terraform upstream + DataHub IaC patterns |
-| datahub-k8s | Deployment | AKS, Helm, FluxCD, runway, container deployment | DataHub deployment-k8s conventions |
-| datahub-contracts | Data contracts | ODCS spec, schema validation, contract-first development | Tech lead's existing ODCS work |
+| voyager-dagster | Orchestration | Dagster API, dg CLI, assets, sensors, deploy.yaml chain, branch deployments | Dagster upstream skill + Voyager deploy conventions |
+| voyager-dlt | API ingestion | dlt API, @dlt.source/@dlt.resource, incremental loading, Dagster-dlt bridge | dlthub upstream + Voyager source patterns |
+| voyager-dbt | Transformation | dbt CLI, models, sources, testing, Raw→Prep→Prod layering | dbt upstream + Voyager datalake conventions |
+| voyager-infra | Infrastructure | Terragrunt, OpenTofu, Azure providers, dp-service-catalog patterns | Terraform upstream + Voyager IaC patterns |
+| voyager-k8s | Deployment | AKS, Helm, FluxCD, runway, container deployment | Voyager deployment-k8s conventions |
+| voyager-contracts | Data contracts | ODCS spec, schema validation, contract-first development | Tech lead's existing ODCS work |
 
 **Not a skill but part of the plugin:**
 
 | Component | Type | Contents |
 |-----------|------|----------|
-| Ambient context | "Platform Context" preamble in each SKILL.md | Slim DataHub mental model — read when any skill is invoked (.instructions.md not supported by plugin format) |
-| datahub-platform/references/ | Reference files | Architecture, datalake layers, deployment paths, template map, PR workflows — read by domain skills via path |
+| Ambient context | "Platform Context" preamble in each SKILL.md | Slim Voyager mental model — read when any skill is invoked (.instructions.md not supported by plugin format) |
+| voyager-platform/references/ | Reference files | Architecture, datalake layers, deployment paths, template map, PR workflows — read by domain skills via path |
 
 ---
 
@@ -452,7 +452,7 @@ This is separate from the plugin because per-repo instructions are version-contr
 ### Risk 1: Plugin Feature is Preview
 
 **Problem:** Agent Plugins are a VS Code preview feature. The API, manifest format, or marketplace behavior could change before stable release.
-**Mitigation:** Maintain the v4 `setup.ps1` fallback alongside the plugin. Both install to the same locations and can coexist. If the plugin feature breaks or changes incompatibly, developers fall back to `datahub-update` until the plugin is fixed. Monitor VS Code release notes for plugin feature changes.
+**Mitigation:** Maintain the v4 `setup.ps1` fallback alongside the plugin. Both install to the same locations and can coexist. If the plugin feature breaks or changes incompatibly, developers fall back to `voyager-update` until the plugin is fixed. Monitor VS Code release notes for plugin feature changes.
 
 ### Risk 2: ADO Git URLs May Not Work as Marketplace Source
 
@@ -486,7 +486,7 @@ This is separate from the plugin because per-repo instructions are version-contr
 
 ### Risk 8: Curated Knowledge Goes Stale Internally
 
-**Problem:** DataHub conventions change but skills aren't updated.
+**Problem:** Voyager conventions change but skills aren't updated.
 **Mitigation:** Tie skill updates to sprint process. Drift scanner catches cases where discipline fails.
 
 ### Risk 9: Copilot Ignores Skill Constraints
@@ -497,12 +497,12 @@ This is separate from the plugin because per-repo instructions are version-contr
 ### Risk 10: New Developer Onboarding
 
 **Problem:** New developer starts, doesn't have plugin installed.
-**Mitigation:** Onboarding checklist includes: enable `chat.plugins.enabled`, add marketplace URL to settings, install DataHub plugin from Extensions sidebar. Three steps, no scripts.
+**Mitigation:** Onboarding checklist includes: enable `chat.plugins.enabled`, add marketplace URL to settings, install Voyager plugin from Extensions sidebar. Three steps, no scripts.
 
 ### Risk 11: Drift Scanner Requires Cross-Repo Access
 
 **Problem:** The scanner pipeline needs read access to all 15 repos.
-**Mitigation:** Create a dedicated service connection with read-only access to all DataHub repos.
+**Mitigation:** Create a dedicated service connection with read-only access to all Voyager repos.
 
 ---
 
@@ -510,10 +510,10 @@ This is separate from the plugin because per-repo instructions are version-contr
 
 ### Adding a New Skill
 
-1. Create `plugins/datahub/skills/{name}/SKILL.md` following the standard structure (include Platform Context preamble)
+1. Create `plugins/voyager/skills/{name}/SKILL.md` following the standard structure (include Platform Context preamble)
 2. Add `references/` directory with supporting material
 3. If curating from upstream, add `UPSTREAM-SOURCE.md` with source details
-4. Add skill path to `plugins/datahub/plugin.json` (use `./skills/{name}`)
+4. Add skill path to `plugins/voyager/plugin.json` (use `./skills/{name}`)
 5. Add the new skill's repos to `scan-config.json`
 6. Add example prompts and expected outputs to `tests/`
 7. Test with at least two developers on real tasks
@@ -539,7 +539,7 @@ This is separate from the plugin because per-repo instructions are version-contr
 - [ ] Check upstream sources for major version changes (Dagster, dbt, dlt, Databricks, Terraform)
 - [ ] Review accumulated drift reports for patterns
 - [ ] Review test results — run example prompts against current skills
-- [ ] Check if any DataHub platform conventions have changed
+- [ ] Check if any Voyager platform conventions have changed
 - [ ] Update UPSTREAM-SOURCE.md for any re-curated skills
 - [ ] Bump versions and merge
 
@@ -552,7 +552,7 @@ This is separate from the plugin because per-repo instructions are version-contr
 Validated the plugin mechanism. Full details in `PHASE-0-SETUP-JOURNAL.md`.
 
 - [x] Enable `chat.plugins.enabled` in VS Code
-- [x] Create minimal test plugin with one skill (datahub-dlt) in the central repo
+- [x] Create minimal test plugin with one skill (voyager-dlt) in the central repo
 - [x] Add `marketplace.json` to the central repo
 - [ ] ~~Test: does ADO HTTPS git URL work as marketplace source?~~ — Inconclusive, moved to GitHub
 - [x] Test: can developer install plugin from Extensions sidebar? — Yes, with clone workaround
@@ -566,17 +566,17 @@ Validated the plugin mechanism. Full details in `PHASE-0-SETUP-JOURNAL.md`.
 
 - [ ] Build full central repo structure with plugin manifests
 - [ ] Write .instructions.md (or implement preamble fallback)
-- [ ] Build datahub-platform reference files
-- [ ] Build datahub-dlt skill (curate from upstream + DataHub conventions)
-- [ ] Write copilot-instructions.md for datahub-data-platform-repo
-- [ ] Test full chain: install plugin → open DataHub repo → use skill → get DataHub-specific answer
+- [ ] Build voyager-platform reference files
+- [ ] Build voyager-dlt skill (curate from upstream + Voyager conventions)
+- [ ] Write copilot-instructions.md for voyager-data-platform-repo
+- [ ] Test full chain: install plugin → open Voyager repo → use skill → get Voyager-specific answer
 - [ ] Deploy to 2-3 developers on real sprint tasks
 - [ ] Maintain v4 setup.ps1 as fallback
 
 ### Phase 2: Dagster + dbt + Infrastructure (Week 4-5)
 
-- [ ] Build datahub-dagster skill (curate from tech lead's upstream skill)
-- [ ] Build datahub-dbt skill (curate from upstream)
+- [ ] Build voyager-dagster skill (curate from tech lead's upstream skill)
+- [ ] Build voyager-dbt skill (curate from upstream)
 - [ ] Write copilot-instructions.md for data-transformation
 - [ ] Build scan-config.json for initial repos
 - [ ] Build and test drift scanner pipeline
@@ -586,8 +586,8 @@ Validated the plugin mechanism. Full details in `PHASE-0-SETUP-JOURNAL.md`.
 
 ### Phase 3: Full Coverage (Week 6-8)
 
-- [ ] Build datahub-k8s and datahub-infra skills
-- [ ] Adopt datahub-contracts skill from tech lead's ODCS work
+- [ ] Build voyager-k8s and voyager-infra skills
+- [ ] Adopt voyager-contracts skill from tech lead's ODCS work
 - [ ] Write copilot-instructions.md for all remaining repos
 - [ ] Expand scan-config.json to cover all repos
 - [ ] Write MAINTENANCE.md
@@ -601,14 +601,14 @@ Validated the plugin mechanism. Full details in `PHASE-0-SETUP-JOURNAL.md`.
 ## 15. Coordination with Tech Lead's Existing Work
 
 The tech lead has already built:
-- Dagster upstream skill (curate into datahub-dagster)
-- ODCS agent (adapt substance into datahub-contracts skill)
+- Dagster upstream skill (curate into voyager-dagster)
+- ODCS agent (adapt substance into voyager-contracts skill)
 - Various custom skills with nested reference files
 
 **Approach:** Frame the central repo as scaling her work across all 15 repos. Specifically:
-- Her Dagster upstream skill → curate into datahub-dagster, filtering through DataHub conventions
-- Her ODCS agent → extract the knowledge and constraints into datahub-contracts skill format
-- Her custom DataHub-specific content → evaluate for datahub-platform references
+- Her Dagster upstream skill → curate into voyager-dagster, filtering through Voyager conventions
+- Her ODCS agent → extract the knowledge and constraints into voyager-contracts skill format
+- Her custom Voyager-specific content → evaluate for voyager-platform references
 - Coordinate before Phase 1 to align on structure and avoid duplicate effort
 
 ---
@@ -617,11 +617,11 @@ The tech lead has already built:
 
 | v4 Component | v5 Status | Reason |
 |--------------|-----------|--------|
-| setup.ps1 + datahub-update | **Kept as fallback** | Plugin feature is preview. Fallback needed until stable. Both mechanisms coexist. |
+| setup.ps1 + voyager-update | **Kept as fallback** | Plugin feature is preview. Fallback needed until stable. Both mechanisms coexist. |
 | PowerShell profile registration | **Kept as fallback** | Same reason. Not needed if plugin is primary distribution. |
 | ADO pipeline merge notification | **Replaced by plugin update** | VS Code's plugin system handles update notification natively. If it doesn't notify reliably, re-add Teams notification as supplement. |
 | Staleness warning in skills | **Removed** | Plugin marketplace handles versioning. Developers see updates in Extensions sidebar. No need for skills to self-check staleness. |
-| datahub-version.json | **Removed** | Plugin versioning in plugin.json replaces custom version tracking. |
+| voyager-version.json | **Removed** | Plugin versioning in plugin.json replaces custom version tracking. |
 | Three-layer distribution defense | **Simplified to one** | Plugin install replaces notification + command + staleness warning. Fallback to v4 if plugin is unavailable. |
 
 ---
@@ -630,9 +630,9 @@ The tech lead has already built:
 
 | v3 Component | Status | Reason |
 |--------------|--------|--------|
-| .instructions.md as routing table | **Repurposed** as ambient context | Copilot doesn't reliably read it before matching skills. Now carries a slim DataHub mental model. |
+| .instructions.md as routing table | **Repurposed** as ambient context | Copilot doesn't reliably read it before matching skills. Now carries a slim Voyager mental model. |
 | Specialist agents (.agent.md) | Dropped | Copilot skips agents when skills match keywords directly. Agent value now lives inside skills. |
 | runSubagent delegation | Dropped | Unnecessary when there's no agent to delegate to. |
 | Orchestrator agent for multi-skill tasks | Dropped | Testing confirmed Copilot reads multiple skills natively. |
 | Separate upstream skill directories | Dropped | Raw upstream skills compete with curated skills. Upstream knowledge curated into domain skills. |
-| datahub-platform as a skill | **Demoted** to reference directory | Prevents keyword collision. No SKILL.md — only read when domain skills point to it. |
+| voyager-platform as a skill | **Demoted** to reference directory | Prevents keyword collision. No SKILL.md — only read when domain skills point to it. |
