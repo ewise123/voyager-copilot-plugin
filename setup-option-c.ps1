@@ -28,5 +28,15 @@ Write-Host "  `"chat.plugins.paths`": {" -ForegroundColor Cyan
 Write-Host "      `"$pluginPath`": true" -ForegroundColor Cyan
 Write-Host "  }" -ForegroundColor Cyan
 Write-Host ""
+Write-Host "Step 2: Add the ADO MCP server" -ForegroundColor Green
+Write-Host "(Ctrl+Shift+P -> 'MCP: Open User Configuration')" -ForegroundColor Yellow
+Write-Host "Add this inside the 'servers' object:" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  `"ado`": {" -ForegroundColor Cyan
+Write-Host "      `"type`": `"stdio`"," -ForegroundColor Cyan
+Write-Host "      `"command`": `"npx`"," -ForegroundColor Cyan
+Write-Host "      `"args`": [`"-y`", `"@azure-devops/mcp`", `"SSAAIAccelerator`", `"-d`", `"core`", `"work`", `"work-items`"]" -ForegroundColor Cyan
+Write-Host "  }" -ForegroundColor Cyan
+Write-Host ""
 Write-Host "Then reload VS Code (Ctrl+Shift+P -> 'Developer: Reload Window')" -ForegroundColor Yellow
 Write-Host "Verify: type /skills in Copilot Chat - voyager-dlt should appear" -ForegroundColor Yellow

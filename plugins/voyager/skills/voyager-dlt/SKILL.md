@@ -8,7 +8,7 @@ description: >
   data into the Raw datalake layer.
 ---
 
-# Voyager dlt Expert (v0.3.0 — update test)
+# Voyager dlt Expert
 
 ## Platform Context
 
