@@ -3,7 +3,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "node ./hooks/dod-check/check.js",
+        "command": "node ./plugins/voyager/hooks/dod-check/check.js",
         "timeout": 60
       }
     ]
