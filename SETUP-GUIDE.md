@@ -66,8 +66,8 @@ authentication. Credentials are cached after that.
 
 ### Step 5: Verify
 
-1. Type `/skills` in Copilot Chat. You should see `voyager-dlt` and
-   `voyager-workflow` with "Plugins" labels.
+1. Type `/skills` in Copilot Chat. You should see `voyager-dlt`,
+   `voyager-workflow`, and `voyager-dod` with "Plugins" labels.
 2. Try: `work on task #250` (use any real ADO task ID) — Copilot should
    fetch the work item, walk the hierarchy, and check Definition of Ready.
 
@@ -91,39 +91,69 @@ Then reload VS Code: **Ctrl+Shift+P** -> `Developer: Reload Window`
 
 | Skill | When to Use | Invocation |
 |-------|-------------|------------|
+| `voyager-workflow` | Starting work from ADO work items, DoR/DoD checks | Say "work on task #NNN" or `/voyager-workflow` |
 | `voyager-dlt` | dlt sources, API ingestion, p8e-data-source packages, Raw layer | `/voyager-dlt` or auto-matches on dlt keywords |
-| `voyager-workflow` | Starting work from ADO work items, DoR/DoD checks | `/voyager-workflow` or say "work on task #NNN" |
+| `voyager-dod` | Verify Definition of Done after coding | Say "check DoD" or "ready for PR" or `/voyager-dod` |
 
-More skills (voyager-dagster, voyager-dbt, voyager-infra) coming in Phase 1-3.
+More skills (voyager-dagster, voyager-dbt, voyager-infra) coming in later phases.
 
-## How Skills Work
+## Typical Workflow
 
-Just describe your task naturally. Copilot matches keywords to the right skill:
-
-> I need to create a new dlt source for ServiceNow using the p8e-data-source pattern
-
-Copilot reads the `voyager-dlt` skill and follows Voyager conventions.
-
-For work items, mention the task number:
+### 1. Pick up a task
 
 > work on task #250
 
-Copilot reads `voyager-workflow`, fetches the ADO work item, walks the
-hierarchy (task -> story -> feature), checks Definition of Ready, presents
-acceptance criteria and DoD checklist, then hands off to the domain skill.
+Copilot auto-matches `voyager-workflow`:
+- Fetches the task from ADO via the MCP server
+- Walks the hierarchy: Task -> Story -> Feature -> Epic
+- Checks Story Definition of Ready (acceptance criteria, sprint, estimate, blockers)
+- Presents acceptance criteria and DoD checklist
+- Hands off to the appropriate domain skill (e.g., voyager-dlt)
 
-Or invoke explicitly with `/voyager-dlt` or `/voyager-workflow`.
+### 2. Do the work
 
-## DoD Enforcement Hook
+Copilot uses the domain skill to guide implementation. For example, `voyager-dlt`
+provides dlt source patterns, scaffolding templates, and Voyager conventions.
 
-A hook runs automatically when the coding agent session ends. It checks:
+### 3. Check Definition of Done
 
+> check DoD
+
+Or: `/voyager-dod`
+
+Copilot auto-matches `voyager-dod` and runs:
 - **Stage 1 (automated):** Ruff linting, formatting, pytest, coverage >= 80%
-- **Stage 2 (placeholder):** Future LLM-based acceptance criteria evaluation
-- **Stage 3 (checklist):** Prints remaining human actions (PR, review, PO acceptance)
+- **Stage 2 (manual):** Reviews acceptance criteria from the parent story
+- **Stage 3 (checklist):** Prints remaining human actions
 
-Requires `pyproject.toml` in the working directory. Skips gracefully in
-non-Python repos.
+### 4. Create PR and finish
+
+Follow the Stage 3 checklist: create PR, get review, merge, PO verification,
+close story in ADO.
+
+## Story DoR and DoD Reference
+
+### Definition of Ready (Story must meet ALL before starting)
+
+- User story format: "As a [role], I can [action], so that [benefit]"
+- Acceptance criteria explicit (Given/When/Then or testable checklist)
+- Team understands what success looks like
+- Testable (team knows how to verify)
+- Estimated (1, 2, 3, or 5 points; if >5, break down further)
+- No blockers (access granted, dependencies resolved)
+- Assigned to sprint
+- Team member volunteered
+
+### Definition of Done (ALL must be true to close)
+
+- Code written and meets standards (no linting errors)
+- Unit tests written and passing (coverage >80%, edge cases tested)
+- Code reviewed and approved (peer review, comments addressed)
+- Integrated with main branch (merged, CI/CD green)
+- Acceptance criteria verified (manual or automated test)
+- PO can verify in dev/test environment
+- PO accepted (Sprint Review or delegated)
+- Story closed in ADO
 
 ## Troubleshooting
 
@@ -157,18 +187,15 @@ voyager-copilot-plugin/
 │   ├── .github/plugin.json        # Plugin manifest (backup)
 │   ├── .mcp.json                  # ADO MCP config (bundled, may not auto-load)
 │   ├── plugin.json                # Plugin manifest
-│   ├── hooks.json                 # DoD hook config
-│   ├── hooks/dod-check/
-│   │   ├── check.js               # DoD enforcement script
-│   │   ├── package.json
-│   │   └── README.md
 │   └── skills/
 │       ├── voyager-dlt/           # dlt source expertise
 │       │   ├── SKILL.md
 │       │   ├── UPSTREAM-SOURCE.md
 │       │   ├── skill-metadata.json
 │       │   └── references/
-│       └── voyager-workflow/      # ADO work item workflow
+│       ├── voyager-workflow/      # ADO work item workflow + DoR/DoD
+│       │   └── SKILL.md
+│       └── voyager-dod/           # Definition of Done checker
 │           └── SKILL.md
 ├── setup-option-c.ps1             # Onboarding script
 ├── SETUP-GUIDE.md                 # This file
