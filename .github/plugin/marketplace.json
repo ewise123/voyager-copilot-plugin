@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "DataHub Copilot plugin marketplace",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "datahub",
       "description": "DataHub platform expertise - curated skills for dlt, Dagster, dbt, infrastructure, K8s, and data contracts",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./plugins/datahub"
     }
   ]

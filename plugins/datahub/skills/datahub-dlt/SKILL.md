@@ -8,7 +8,7 @@ description: >
   data into the Raw datalake layer.
 ---
 
-# DataHub dlt Expert
+# DataHub dlt Expert (v0.2.0 — update test)
 
 ## Platform Context
 
