@@ -6,6 +6,9 @@
     "name": "Voyager Platform Team"
   },
   "skills": [
-    "./skills/voyager-dlt"
-  ]
+    "./skills/voyager-dlt",
+    "./skills/voyager-workflow"
+  ],
+  "hooks": "hooks.json",
+  "mcpServers": ".mcp.json"
 }

@@ -1,0 +1,6 @@
+{
+  "name": "voyager-dod-check",
+  "version": "0.3.0",
+  "description": "Story Definition of Done enforcement hook for Voyager Copilot Plugin",
+  "private": true
+}
