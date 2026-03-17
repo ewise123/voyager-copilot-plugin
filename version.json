@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "updated": "2026-03-17",
-  "changelog": "Added voyager-dagster skill curated from dagster-io/skills upstream"
+  "changelog": "Added voyager-contracts skill, enhanced voyager-dod with pre-commit logic"
 }
