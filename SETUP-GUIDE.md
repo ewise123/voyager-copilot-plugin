@@ -184,19 +184,16 @@ voyager-copilot-plugin/
 ├── .github/plugin/
 │   └── marketplace.json           # Marketplace registry (for future Option A)
 ├── plugins/voyager/
-│   ├── .github/plugin.json        # Plugin manifest (backup)
-│   ├── .mcp.json                  # ADO MCP config (bundled, may not auto-load)
 │   ├── plugin.json                # Plugin manifest
 │   └── skills/
+│       ├── voyager-contracts/     # ODCS data contract expertise
+│       ├── voyager-dagster/       # Dagster orchestration patterns
+│       ├── voyager-dbt/           # dbt transformation patterns
 │       ├── voyager-dlt/           # dlt source expertise
-│       │   ├── SKILL.md
-│       │   ├── UPSTREAM-SOURCE.md
-│       │   ├── skill-metadata.json
-│       │   └── references/
-│       ├── voyager-workflow/      # ADO work item workflow + DoR/DoD
-│       │   └── SKILL.md
-│       └── voyager-dod/           # Definition of Done checker
-│           └── SKILL.md
+│       ├── voyager-dod/           # Definition of Done checker
+│       ├── voyager-infra/         # Terraform/Terragrunt infrastructure
+│       ├── voyager-k8s/           # Kubernetes & FluxCD patterns
+│       └── voyager-workflow/      # ADO work item workflow + DoR/DoD
 ├── setup-option-c.ps1             # Onboarding script
 ├── SETUP-GUIDE.md                 # This file
 ├── version.json

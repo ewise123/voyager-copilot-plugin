@@ -14,6 +14,5 @@
     "./skills/voyager-contracts",
     "./skills/voyager-workflow",
     "./skills/voyager-dod"
-  ],
-  "mcpServers": ".mcp.json"
+  ]
 }
