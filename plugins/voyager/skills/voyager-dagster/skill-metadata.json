@@ -1,0 +1,12 @@
+{
+  "tracked_versions": {
+    "dagster": "1.10.x",
+    "dagster-dbt": "0.26.x",
+    "dagster-dlt": "0.26.x",
+    "dagster-dg-cli": "0.26.x"
+  },
+  "upstream_repo": "https://github.com/dagster-io/skills",
+  "upstream_skill": "dagster-expert",
+  "upstream_version": "0.0.12",
+  "last_curated": "2026-03-17"
+}

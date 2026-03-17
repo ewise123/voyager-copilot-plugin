@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Voyager Copilot plugin marketplace",
-    "version": "0.4.0"
+    "version": "0.5.0"
   },
   "plugins": [
     {
       "name": "voyager",
       "description": "Voyager platform expertise - curated skills for dlt, Dagster, dbt, infrastructure, K8s, and data contracts",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "source": "./plugins/voyager"
     }
   ]
