@@ -14,14 +14,21 @@ keyword or you invoke them explicitly (e.g., `/voyager-dlt`).
 
 ### Step 1: Clone the repo
 
+Clone to any location you prefer. Examples:
+
+**Windows (PowerShell):**
 ```powershell
-git clone https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/voyager-copilot-plugin "$env:USERPROFILE\projects\voyager-copilot-plugin"
+git clone <ADO_CLONE_URL> "C:\path\to\voyager-copilot-plugin"
 ```
 
-Or run the setup script (if you already have the repo):
+**WSL/Linux:**
+```bash
+git clone <ADO_CLONE_URL> ~/projects/voyager-copilot-plugin
+```
 
-```powershell
-.\setup-option-c.ps1
+Replace `<ADO_CLONE_URL>` with your org's ADO repo URL. For SSA:
+```
+https://dev.azure.com/SSAAIAccelerator/VoyagerCopilot/_git/voyager-copilot-plugin
 ```
 
 ### Step 2: Add the plugin to VS Code
@@ -33,11 +40,20 @@ Add:
 ```json
 "chat.plugins.enabled": true,
 "chat.plugins.paths": {
-    "C:\\Users\\YOUR_USERNAME\\projects\\voyager-copilot-plugin\\plugins\\voyager": true
+    "<FULL_PATH_TO_CLONE>\\plugins\\voyager": true
 }
 ```
 
-Replace `YOUR_USERNAME` with your Windows username.
+Replace `<FULL_PATH_TO_CLONE>` with the **absolute path** where you cloned
+the repo. Use the path format that matches how you connect to VS Code:
+
+| VS Code connection | Path format | Example |
+|-------------------|-------------|---------|
+| Local (Windows) | Windows path with `\\` | `C:\\repos\\voyager-copilot-plugin\\plugins\\voyager` |
+| Remote - WSL | Linux path | `/home/yourname/projects/voyager-copilot-plugin/plugins/voyager` |
+
+**Important:** The path must point to the `plugins/voyager/` directory inside
+the clone, not the repo root. That's where `plugin.json` lives.
 
 ### Step 3: Add the Azure DevOps MCP server
 
@@ -52,13 +68,14 @@ Add this server entry inside the `"servers"` object:
 "ado": {
     "type": "stdio",
     "command": "npx",
-    "args": ["-y", "@azure-devops/mcp", "SSAAIAccelerator", "-d", "core", "work", "work-items"]
+    "args": ["-y", "@azure-devops/mcp", "YOUR_ADO_ORG", "-d", "core", "work", "work-items"]
 }
 ```
 
-**Note:** Change `SSAAIAccelerator` to your ADO org name if different. First
-time you use an ADO tool, a browser window will open for Microsoft
-authentication. Credentials are cached after that.
+Replace `YOUR_ADO_ORG` with your Azure DevOps organization name (e.g.,
+`SSAAIAccelerator`, `protectivetfsprod`). First time you use an ADO tool, a
+browser window will open for Microsoft authentication. Credentials are cached
+after that.
 
 ### Step 4: Reload VS Code
 
@@ -66,9 +83,9 @@ authentication. Credentials are cached after that.
 
 ### Step 5: Verify
 
-1. Type `/skills` in Copilot Chat. You should see `voyager-dlt`,
-   `voyager-workflow`, and `voyager-dod` with "Plugins" labels.
-2. Try: `work on task #250` (use any real ADO task ID) — Copilot should
+1. Type `/skills` in Copilot Chat. You should see all 8 voyager skills
+   (voyager-dlt, voyager-dagster, voyager-dbt, etc.) with "Plugins" labels.
+2. Try: `work on task #NNN` (use any real ADO task ID) — Copilot should
    fetch the work item, walk the hierarchy, and check Definition of Ready.
 
 ## Updating the Plugin
@@ -77,7 +94,7 @@ When the team pushes skill updates:
 
 **PowerShell:**
 ```powershell
-git -C "$env:USERPROFILE\projects\voyager-copilot-plugin" pull
+git -C "<FULL_PATH_TO_CLONE>" pull
 ```
 
 **Bash/WSL:**
