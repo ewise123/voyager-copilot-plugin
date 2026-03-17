@@ -1,0 +1,8 @@
+{
+  "tracked_versions": {
+    "opentofu": "1.9.x",
+    "terragrunt": "0.68.x",
+    "azurerm-provider": "4.x"
+  },
+  "last_curated": "2026-03-17"
+}

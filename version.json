@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
-  "updated": "2026-03-16",
-  "changelog": "Renamed from DataHub to Voyager"
+  "version": "0.4.0",
+  "updated": "2026-03-17",
+  "changelog": "Added voyager-dbt, voyager-infra, voyager-k8s skills curated from upstream"
 }

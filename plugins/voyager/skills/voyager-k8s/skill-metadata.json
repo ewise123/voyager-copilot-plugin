@@ -1,0 +1,8 @@
+{
+  "tracked_versions": {
+    "kubernetes": "1.30.x",
+    "helm": "3.16.x",
+    "fluxcd": "2.4.x"
+  },
+  "last_curated": "2026-03-17"
+}

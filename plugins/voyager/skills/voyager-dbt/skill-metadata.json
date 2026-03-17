@@ -1,0 +1,7 @@
+{
+  "tracked_versions": {
+    "dbt-core": "1.9.x",
+    "dbt-databricks": "1.9.x"
+  },
+  "last_curated": "2026-03-17"
+}

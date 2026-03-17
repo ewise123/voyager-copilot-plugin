@@ -4,5 +4,7 @@
     "dlt-az": "1.14.1",
     "dlt-databricks": "1.14.1"
   },
-  "last_curated": "2026-03-12"
+  "upstream_repo": "https://github.com/dlt-hub/dlthub-ai-workbench",
+  "upstream_toolkit": "rest-api-pipeline",
+  "last_curated": "2026-03-17"
 }

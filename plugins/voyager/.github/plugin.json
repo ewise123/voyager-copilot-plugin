@@ -1,12 +1,15 @@
 {
   "name": "voyager",
   "description": "Voyager platform expertise for Copilot - curated skills for dlt, Dagster, dbt, Terraform, K8s, and ODCS data contracts",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": {
     "name": "Voyager Platform Team"
   },
   "skills": [
     "./skills/voyager-dlt",
+    "./skills/voyager-dbt",
+    "./skills/voyager-infra",
+    "./skills/voyager-k8s",
     "./skills/voyager-workflow",
     "./skills/voyager-dod"
   ],
